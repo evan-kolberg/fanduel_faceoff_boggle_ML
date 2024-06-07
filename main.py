@@ -1,40 +1,60 @@
+import subprocess
 from paddleocr import PaddleOCR, draw_ocr
+from PIL import Image, ImageDraw, ImageFont
+import numpy as np
 
-# Paddleocr目前支持的多语言语种可以通过修改lang参数进行切换
-# 例如`ch`, `en`, `fr`, `german`, `korean`, `japan`
-ocr = PaddleOCR(use_angle_cls=True, lang="ch")
-img_path = 'test.png'
-result = ocr.ocr(img_path, cls=True)
-for idx in range(len(result)):
-    res = result[idx]
-    for line in res:
-        print(line)
+# Initialize OCR
+ocr = PaddleOCR(use_angle_cls=True, lang="en")
+img_path = 'test3.png'
 
-# 显示结果
-from PIL import Image
-result = result[0]
+# Open the image and get its dimensions
 image = Image.open(img_path).convert('RGB')
-boxes = [line[0] for line in result]
-txts = [line[1][0] for line in result]
-scores = [line[1][1] for line in result]
-im_show = draw_ocr(image, boxes, txts, scores, font_path='simfang.ttf')
-im_show = Image.fromarray(im_show)
-im_show.save('result.jpg')
+img_width, img_height = image.size
 
-print(txts)
+# Calculate dimensions of each cell in the 4x4 grid
+cell_width = img_width // 4
+cell_height = img_height // 4
 
-processed_list = ['I' if char == '一' else char for char in txts if not char.isdigit()]
+# Create a blank image to stitch the results
+stitched_image = Image.new('RGB', (img_width, img_height))
 
-output = '\n'.join([''.join(processed_list[i:i+4]) for i in range(0, len(processed_list), 4)])
+# Loop through the 4x4 grid
+for i in range(4):
+    for j in range(4):
+        # Calculate the coordinates of the current cell
+        left = j * cell_width
+        top = i * cell_height
+        right = (j + 1) * cell_width
+        bottom = (i + 1) * cell_height
+        
+        # Crop the current cell from the image
+        cell_img = image.crop((left, top, right, bottom))
+        
+        # Perform OCR on the current cell
+        result = ocr.ocr(np.array(cell_img), cls=True)
+        
+        # Check if OCR result is not None
+        if result is not None:
+            # Create a drawing object
+            draw = ImageDraw.Draw(cell_img)
+            
+            # Draw bounding boxes on the cell image
+            for line in result:
+                # Check if line is not None
+                if line is not None:
+                    for word in line:
+                        # Check if word is not None
+                        if word is not None:
+                            # Extract box coordinates
+                            box = word[0]
+                            # Convert box coordinates to tuple format (x0, y0, x1, y1)
+                            x0, y0 = box[0]
+                            x1, y1 = box[2]
+                            box_tuple = (x0, y0, x1, y1)
+                            draw.rectangle(box_tuple, outline='red')
+            
+            # Paste the cell image with bounding boxes onto the stitched image
+            stitched_image.paste(cell_img, (left, top))
 
-print(output)
-
-with open('output.txt', 'w') as file:
-    file.write(output)
-
-
-
-
-
-
-
+# Save the stitched image
+stitched_image.save('stitched_result.jpg')
