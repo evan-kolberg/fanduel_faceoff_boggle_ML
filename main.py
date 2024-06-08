@@ -33,7 +33,16 @@ def main(letters_folder, output_file, overlay_folder):
     print(board)
     print(color_grid)
 
-    subprocess.run(["/Users/evankolberg/programming/boggle-solver/target/release/boggle-solve", output_file])
+    result = subprocess.run(["/Users/evankolberg/programming/boggle-solver/target/release/boggle-solve", output_file], capture_output=True, text=True)
+    solver_output = result.stdout.strip()
+
+    word_list = solver_output.split("\n")
+
+    sorted_words = sorted(word_list, key=len)
+
+    print("\nWords (shortest to longest)\n")
+    for word in sorted_words:
+        print(word)
 
 
 if __name__ == "__main__":
