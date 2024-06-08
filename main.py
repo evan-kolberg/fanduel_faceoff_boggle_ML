@@ -5,15 +5,14 @@ import os
 from tabulate import tabulate
 from concurrent.futures import ThreadPoolExecutor
 
-def load_images_and_masks(folder_path, resize_shape=(150, 150)):
+def load_images_and_masks(folder_path):
     letter_images = {}
     masks = {}
     for letter_image_path in glob.glob(os.path.join(folder_path, "*.png")):
         letter = os.path.splitext(os.path.basename(letter_image_path))[0]
         img = cv2.imread(letter_image_path)
-        resized_img = cv2.resize(img, resize_shape)
-        letter_images[letter] = resized_img
-        gray = cv2.cvtColor(resized_img, cv2.COLOR_BGR2GRAY)
+        letter_images[letter] = img
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         _, mask = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV)
         masks[letter] = mask
     return letter_images, masks
@@ -66,10 +65,10 @@ def main(image_path, letters_folder, output_file, overlay_folder):
     os.makedirs(overlay_folder, exist_ok=True)
     letter_images, masks = load_images_and_masks(letters_folder)
     color_ranges = {
-        'red': [(201, 50, 40), (255, 210, 85)],
+        'red': [(210, 50, 40), (255, 210, 85)],
         'purple': [(125, 75, 235), (145, 100, 255)],
         'green': [(85, 150, 55), (100, 170, 75)],
-        'yellow': [(200, 160, 0), (255, 230, 60)]
+        'yellow': [(230, 200, 0), (255, 255, 100)]
     }
     board, color_grid, cells = split_and_process_image(image_path, letter_images, masks, color_ranges, overlay_folder)
     with open(output_file, "w") as f:
@@ -82,7 +81,7 @@ def main(image_path, letters_folder, output_file, overlay_folder):
     print(tabulate(color_grid, tablefmt="grid"))
 
 if __name__ == "__main__":
-    image_path = "assets/boards/board6.png"
+    image_path = "assets/boards/board1.png"
     letters_folder = "assets/letters"
     output_file = "output.txt"
     overlay_folder = "overlays"
