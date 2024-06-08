@@ -2,6 +2,8 @@ import os
 from tabulate import tabulate
 from image_processing import load_images_and_masks, split_and_process_image
 from screen_capture import select_capture_region, capture_screen_region, save_captured_image
+import subprocess
+from collections import defaultdict
 
 def main(letters_folder, output_file, overlay_folder):
     os.makedirs(overlay_folder, exist_ok=True)
@@ -27,6 +29,12 @@ def main(letters_folder, output_file, overlay_folder):
     
     print(tabulate(board, tablefmt="grid"))
     print(tabulate(color_grid, tablefmt="grid"))
+
+    print(board)
+    print(color_grid)
+
+    subprocess.run(["/Users/evankolberg/programming/boggle-solver/target/release/boggle-solve", output_file])
+
 
 if __name__ == "__main__":
     letters_folder = "assets/letters"
