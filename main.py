@@ -48,8 +48,8 @@ def overlay_images(cell, best_match_img, alpha=0.4):
 
 def check_colors_in_cell(cell, color_ranges):
     color_counts = {color: 0 for color in color_ranges}
-    for row in cell[:40]:
-        for pixel in row[:40]:
+    for row in cell[:20]:
+        for pixel in row[:20]:
             for color, (lower_bound, upper_bound) in color_ranges.items():
                 if (lower_bound[0] <= pixel[2] <= upper_bound[0] and
                     lower_bound[1] <= pixel[1] <= upper_bound[1] and
@@ -80,10 +80,10 @@ def main(image_path, letters_folder, output_file):
         return
     masks = precompute_masks(letter_images)
     color_ranges = {
-        'red': [(201, 63, 56), (221, 83, 76)],
-        'purple': [(125, 77, 235), (145, 97, 255)],
-        'green': [(86, 149, 53), (100, 169, 73)],
-        'yellow': [(200, 157, 0), (255, 228, 60)]
+        'red': [(201, 50, 40), (255, 210, 85)],
+        'purple': [(125, 75, 235), (145, 100, 255)],
+        'green': [(85, 150, 55), (100, 170, 75)],
+        'yellow': [(200, 160, 0), (255, 230, 60)]
     }
     board = []
     color_grid = []
