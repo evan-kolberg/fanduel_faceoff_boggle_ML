@@ -70,14 +70,48 @@ def overlay_images(cell, best_match_img):
     overlay = cv2.addWeighted(cell, alpha, best_match_img, 1 - alpha, 0)
     return overlay
 
+def check_colors_in_cell(cell):
+    # Define color ranges for each color
+    color_ranges = {
+        'red': [(201, 63, 56), (221, 83, 76)],
+        'purple': [(125, 77, 235), (145, 97, 255)],
+        'green': [(0, 149, 53), (10, 169, 73)],
+        'yellow': [(210, 157, 0), (230, 177, 20)]
+    }
+
+    # Initialize counters for each color
+    color_counts = {color: 0 for color in color_ranges}
+
+    # Iterate through each pixel in the cell
+    for row in cell:
+        for pixel in row:
+            # Check if the pixel color falls within the specified ranges for each color
+            for color, (lower_bound, upper_bound) in color_ranges.items():
+                if (lower_bound[0] <= pixel[2] <= upper_bound[0] and
+                        lower_bound[1] <= pixel[1] <= upper_bound[1] and
+                        lower_bound[2] <= pixel[0] <= upper_bound[2]):
+                    color_counts[color] += 1
+
+    return color_counts
+
 def process_cell(row_idx, col_idx, cell, masks, letter_images):
     letter_scores = match_letter(cell, masks, row_idx, col_idx)
+    colors_present = check_colors_in_cell(cell)
     best_match = min(letter_scores, key=letter_scores.get)
     overlay = overlay_images(cell, letter_images[best_match])
     overlay_path = f"overlays/overlay_{row_idx}_{col_idx}.png"
     cv2.imwrite(overlay_path, overlay)
     print(f"Overlay saved for cell ({row_idx}, {col_idx}) as {overlay_path}")
-    return best_match, overlay_path, (row_idx, col_idx)
+
+    # Print out which color is detected in the cell along with its count
+    detected_colors = []
+    for color, count in colors_present.items():
+        if count > 0:
+            detected_colors.append(f"{color}: {count}")
+    print(f"Colors detected in cell ({row_idx}, {col_idx}): {', '.join(detected_colors)}")
+
+    return best_match, overlay_path, colors_present, (row_idx, col_idx)
+
 
 def main(image_path, letters_folder):
     cells = split_image(image_path)
@@ -91,24 +125,46 @@ def main(image_path, letters_folder):
     masks = precompute_masks(letter_images)
 
     board = []
+    color_grid = []
 
     with ThreadPoolExecutor() as executor:
         futures = []
         for row_idx, row in enumerate(cells):
             row_data = []
+            color_row_data = []
             for col_idx, cell in enumerate(row):
                 futures.append(executor.submit(process_cell, row_idx, col_idx, cell, masks, letter_images))
         
         processed_cells = [future.result() for future in futures]
         for i in range(0, len(processed_cells), 4):
-            row_data = [processed_cells[i+j][0] for j in range(4)]
-            board.append(row_data)
+            board_row_data = []
+            color_row_data = []
+            for j in range(4):
+                letter, overlay_path, colors_present, (row_idx, col_idx) = processed_cells[i+j]
+                board_row_data.append(letter)
+                if any(colors_present[color] > 0 for color in ['red', 'purple', 'green', 'yellow']):
+                    ticker = ""
+                    if colors_present['red'] > 0:
+                        ticker += "TL"
+                    if colors_present['purple'] > 0:
+                        ticker += "TW"
+                    if colors_present['green'] > 0:
+                        ticker += "DW"
+                    if colors_present['yellow'] > 0:
+                        ticker += "DL"
+                    color_row_data.append(ticker)
+                else:
+                    color_row_data.append("")
+            board.append(board_row_data)
+            color_grid.append(color_row_data)
 
+    print("Board:")
     print(tabulate(board, tablefmt="grid"))
+    print("\nColors detected:")
+    print(tabulate(color_grid, tablefmt="grid"))
 
 if __name__ == "__main__":
-    image_path = "assets/boards/board5.png"
+    image_path = "assets/boards/board1.png"
     letters_folder = "assets/letters"
     main(image_path, letters_folder)
-
 
