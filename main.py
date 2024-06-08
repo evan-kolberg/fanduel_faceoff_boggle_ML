@@ -3,7 +3,6 @@ import numpy as np
 import glob
 import os
 from PIL import Image
-from tabulate import tabulate
 
 # Function to split the input image into a 4x4 grid and save temporary files
 def split_image(image_path):
@@ -37,34 +36,34 @@ def load_letter_images(folder_path):
     for letter_image_path in glob.glob(folder_path + "/*.png"):
         filename = os.path.basename(letter_image_path)
         letter = filename.split(".")[0]
-        img = cv2.imread(letter_image_path, cv2.IMREAD_GRAYSCALE)
+        img = cv2.imread(letter_image_path)
         if img is None:
             print(f"Error: Could not read letter image at {letter_image_path}")
             continue
         # Resize the image to a fixed size for consistency
-        resized_img = cv2.resize(img, (50, 50))
+        resized_img = cv2.resize(img, (150, 150))
         letter_images[letter] = resized_img
         lookup_table[filename.lower()] = letter
     return letter_images, lookup_table
 
 # Function to calculate mean squared error
 def calculate_mse(img1, img2):
-    return np.mean((img1 - img2) ** 2)
+    diff = cv2.absdiff(img1, img2)
+    err = np.mean(diff)
+    return err
 
 # Function to find the best matching letter
 def match_letter(cell, letter_images):
     cell_gray = cv2.cvtColor(cell, cv2.COLOR_BGR2GRAY)
-    best_match = None
-    min_error = float('inf')
-    scores = {}
+    match_scores = {}
     
     for letter, letter_img in letter_images.items():
         # Convert letter image to grayscale
         letter_img_gray = cv2.cvtColor(letter_img, cv2.COLOR_BGR2GRAY)
         error = calculate_mse(cell_gray, letter_img_gray)
-        scores[letter] = error
+        match_scores[letter] = error
         
-    return scores
+    return match_scores
 
 # Function to identify special condition
 def identify_special_condition(cell):
@@ -82,35 +81,14 @@ def identify_special_condition(cell):
     
     color_means = [np.mean(channel) for channel in (h, s, v)]
     
-    closest_special = None
-    min_distance = float('inf')
+    special_scores = {}
     
     for special, thresholds in color_thresholds.items():
         distances = [abs(mean - threshold) for mean, threshold in zip(color_means, thresholds)]
         distance = sum(distances)
-        
-        if distance < min_distance:
-            min_distance = distance
-            closest_special = special
+        special_scores[special] = distance
     
-    return closest_special
-
-# Function to print the board
-def print_board(board):
-    table = []
-    for row in board:
-        table_row = []
-        for cell in row:
-            table_row.append(cell[0])
-        table.append(table_row)
-    print(tabulate(table, tablefmt="grid"))
-
-# Function to write the board to a text file
-def write_board_to_file(board, output_file):
-    with open(output_file, 'w') as f:
-        for row in board:
-            row_data = ''.join([cell[0].upper() for cell in row])
-            f.write(row_data + '\n')
+    return special_scores
 
 def main(image_path, letters_folder):
     cells = split_image(image_path)
@@ -121,35 +99,37 @@ def main(image_path, letters_folder):
         print(f"Error: No letter images loaded from {letters_folder}")
         return
 
-    board = []
+    board = ""
 
-    for row in cells:
-        board_row = []
-        for cell_path in row:
+    for row_idx, row in enumerate(cells):
+        for col_idx, cell_path in enumerate(row):
             cell = cv2.imread(cell_path)
             os.remove(cell_path)  # Delete temporary file after reading
+            
+            # Match letter and calculate closeness scores
             letter_scores = match_letter(cell, letter_images)
-            best_letter = min(letter_scores, key=letter_scores.get)
-            deviation_score = letter_scores[best_letter]
-            special = identify_special_condition(cell)
-            board_row.append((best_letter, deviation_score, special))
-        board.append(board_row)
+            # Identify special condition and calculate color scores
+            special_scores = identify_special_condition(cell)
+            
+            best_match = min(letter_scores, key=letter_scores.get)
+            board += best_match
+            
+            # Print deviation scores for each letter
+            print(f"Deviation for  {row_idx}, {col_idx}:")
+            for letter, score in letter_scores.items():
+                print(f"  - {letter.upper()}: {score}")
+            print("Special condition color scores:")
+            for special, score in special_scores.items():
+                print(f"  - {special}: {score}")
+        board += "\n"
     
-    print("Deviation Scores:")
-    for row in board:
-        for cell in row:
-            print(f"  - {cell[0].upper()}: {cell[1]}")
-    print("\nColor Closenesses:")
-    for row in board:
-        for cell in row:
-            print(f"  - {cell[2].upper()}: {cell[3]}")
-    
-    print("\nGame Board:")
-    print_board(board)
-    
-    output_file = "output.txt"
-    print(f"\nWriting board to file: {output_file}")
-    write_board_to_file(board, output_file)
+    print(board)
+    with open("output.txt", "w") as file:
+        file.write(board)
 
 if __name__ == "__main__":
     image_path = "assets/boards/Screenshot 2024-06-07 171426.png"
+    letters_folder = "assets/letters"
+    print(f"Reading from image path: {image_path}")
+    print(f"Reading from letters folder: {letters_folder}")
+    main(image_path, letters_folder)
