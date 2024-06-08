@@ -107,7 +107,7 @@ def main(image_path, letters_folder):
     print(tabulate(board, tablefmt="grid"))
 
 if __name__ == "__main__":
-    image_path = "assets/boards/board3.png"
+    image_path = "assets/boards/board5.png"
     letters_folder = "assets/letters"
     main(image_path, letters_folder)
 
