@@ -17,11 +17,22 @@ def load_images_and_masks(folder_path):
         masks[letter] = mask
     return letter_images, masks
 
+def calculate_hog_descriptor(img):
+    hog = cv2.HOGDescriptor()
+    return hog.compute(img)
+
 def process_image_cell(cell, masks, letter_images, color_ranges, row_idx, col_idx, overlay_folder):
     gray_cell = cv2.cvtColor(cell, cv2.COLOR_BGR2GRAY)
     _, mask_cell = cv2.threshold(gray_cell, 50, 255, cv2.THRESH_BINARY_INV)
-    letter_scores = {letter: np.mean(cv2.absdiff(mask_cell, mask)) for letter, mask in masks.items()}
-    best_match = min(letter_scores, key=letter_scores.get)
+    cell_hog = calculate_hog_descriptor(gray_cell)
+
+    letter_scores = {}
+    for letter, mask in masks.items():
+        mask_hog = calculate_hog_descriptor(mask)
+        similarity = cv2.compareHist(cell_hog, mask_hog, cv2.HISTCMP_CORREL)
+        letter_scores[letter] = similarity
+
+    best_match = max(letter_scores, key=letter_scores.get)
     overlay = cv2.addWeighted(cell, 0.4, letter_images[best_match], 0.6, 0)
     
     overlay_path = os.path.join(overlay_folder, f"overlay_{row_idx}_{col_idx}.png")
