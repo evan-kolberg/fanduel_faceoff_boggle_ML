@@ -1,7 +1,7 @@
 from PIL import Image
 import os
 
-def resize_images(folder_path, target_size=(605, 605)):
+def resize_images(folder_path, target_size=(603, 603)):
     for filename in os.listdir(folder_path):
         if filename.endswith(".png"):
             file_path = os.path.join(folder_path, filename)
