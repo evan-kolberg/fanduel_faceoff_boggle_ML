@@ -1,16 +1,16 @@
 from PIL import Image
 import os
 
-def resize_images(folder_path, target_size=(603, 603)):
+def resize_images(folder_path, target_size=(605, 605)):
     for filename in os.listdir(folder_path):
         if filename.endswith(".png"):
             file_path = os.path.join(folder_path, filename)
             img = Image.open(file_path)
-            img_resized = img.resize(target_size, Image.LANCZOS)  # Using LANCZOS filter
+            img_resized = img.resize(target_size, Image.LANCZOS)
             img_resized.save(file_path)
 
 if __name__ == "__main__":
-    letters_folder = "assets/boards"
-    print(f"Resizing images in folder: {letters_folder}")
-    resize_images(letters_folder)
+    boards_folder = "assets/boards"
+    print(f"Resizing images in folder: {boards_folder}")
+    resize_images(boards_folder)
     print("Images resized successfully!")
