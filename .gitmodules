@@ -1,5 +1,6 @@
 [submodule "boggle-solver"]
-	url = https://github.com/elfsternberg/boggle-solver
+	path = boggle-solver
+	url = https://github.com/elfsternberg/boggle-solver.git
 [submodule "cvat"]
 	path = cvat
 	url = https://github.com/cvat-ai/cvat.git
