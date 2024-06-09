@@ -1,0 +1,31 @@
+to build:
+
+    open boggle-solver in integrated terminal
+
+    then run: 
+        cargo build --release --features=threaded
+
+    (.venv) evankolberg@Adonis boggle-solver % cargo build --release --features=threaded
+
+
+to run:
+
+    macOS: 
+
+        relative path of boggle-solve binary:
+
+            boggle-solver/target/release/boggle-solve
+
+        relative path of .txt file:
+
+            boggle-solver/sample_board.txt
+
+        command:
+
+            boggle-solver/target/release/boggle-solve boggle-solver/sample_board.tx
+
+        (.venv) evankolberg@Adonis fanduel-boggle-cheat % boggle-solver/target/release/boggle-solve boggle-solver/sample_board.txt
+
+    windows:
+
+        idk yet- prob same thing just with .exe on the binary
