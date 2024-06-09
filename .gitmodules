@@ -1,0 +1,2 @@
+[submodule "boggle-solver"]
+	url = https://github.com/elfsternberg/boggle-solver
