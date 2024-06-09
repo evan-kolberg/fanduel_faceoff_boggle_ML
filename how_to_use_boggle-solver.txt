@@ -2,7 +2,8 @@ to build:
 
     open boggle-solver in integrated terminal
 
-    then run: 
+    then run:
+
         cargo build --release --features=threaded
 
     (.venv) evankolberg@Adonis boggle-solver % cargo build --release --features=threaded
@@ -22,10 +23,10 @@ to run:
 
         command:
 
-            boggle-solver/target/release/boggle-solve boggle-solver/sample_board.tx
+            boggle-solver/target/release/boggle-solve boggle-solver/sample_board.txt
 
         (.venv) evankolberg@Adonis fanduel-boggle-cheat % boggle-solver/target/release/boggle-solve boggle-solver/sample_board.txt
 
     windows:
 
-        idk yet- prob same thing just with .exe on the binary
+        can't get it working
