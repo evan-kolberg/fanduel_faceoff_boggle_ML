@@ -4,8 +4,7 @@ __pycache__/
 raw-boards/
 processed-boards/
 
-training/annotated-boards/
-validating/annotated-boards/
+yolov8x.pt
 
 
 

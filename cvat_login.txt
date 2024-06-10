@@ -1,0 +1,15 @@
+username: admin
+password: password
+
+start docker desktop
+  cd cvat
+  docker exec -it cvat_server bash
+http://localhost:8080/
+
+
+turn on autosave in workspace settings
+
+to create superuser:
+  docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
+
+
