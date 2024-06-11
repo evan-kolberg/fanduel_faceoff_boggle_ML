@@ -4,3 +4,6 @@
 [submodule "cvat"]
 	path = cvat
 	url = https://github.com/cvat-ai/cvat.git
+[submodule "pyggle"]
+	path = pyggle
+	url = https://github.com/andrearcaina/pyggle.git
