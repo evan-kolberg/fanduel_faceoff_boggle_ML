@@ -1,7 +1,7 @@
 from pyggle.lib.pyggle import Boggle
 
-
-board = "akgo wbns bown amli"
+# must be capitalized b/c of dictionary
+board = "HAMN NEPI YOSA TTNR"
 
 boggle = Boggle(board)
 
