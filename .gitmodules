@@ -6,4 +6,4 @@
 	url = https://github.com/cvat-ai/cvat.git
 [submodule "pyggle"]
 	path = pyggle
-	url = https://github.com/andrearcaina/pyggle.git
+	url = https://github.com/evan-kolberg/pyggle.git
