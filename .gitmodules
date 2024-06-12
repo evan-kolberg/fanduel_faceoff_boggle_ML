@@ -7,3 +7,9 @@
 [submodule "boggle-solver"]
 	path = boggle-solver
 	url = https://github.com/elfsternberg/boggle-solver.git
+[submodule "opencv"]
+	path = opencv
+	url = https://github.com/opencv/opencv.git
+[submodule "opencv_contrib"]
+	path = opencv_contrib
+	url = https://github.com/opencv/opencv_contrib.git

@@ -1,4 +1,3 @@
-import time
 from pyggle.lib.pyggle import Boggle, boggle
 
 #  (0,0)  - x +
@@ -68,7 +67,8 @@ def calculate_word_score(word, coords, board, bonus_tiles, letter_points) -> int
 solved = boggle.solve()
 time_taken = boggle.time_solve()
 print(solved)
-print(f"Compute Time: {time_taken}")
+print(f"Compute Time: {time_taken:.7f} seconds")
+
 
 word_scores = []
 for word, coords in solved.items():

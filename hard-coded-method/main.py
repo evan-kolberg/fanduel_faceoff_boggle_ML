@@ -7,12 +7,6 @@
 
 
 
-
-
-
-
-
-
 import os
 from tabulate import tabulate
 from image_processing import load_images_and_masks, split_and_process_image
@@ -48,7 +42,6 @@ def main(letters_folder, output_file, overlay_folder):
     print(board)
     print(color_grid)
 
-    # UPDATE*** REMOVED OLD BOGGLE SOLVER
     result = subprocess.run(["/Users/evankolberg/programming/boggle-solver/target/release/boggle-solve", output_file], capture_output=True, text=True)
     solver_output = result.stdout.strip()
 

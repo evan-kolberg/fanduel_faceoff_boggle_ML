@@ -1,0 +1,40 @@
+need visual studio latest edition
+
+add opencv and the contrib as git submodules (git submodule add ...)
+
+get cuda toolkit and then get the cuDNN files
+
+from the cuDNN download, add the lib, bin, and include folders over the CUDA folder in the toolkit in your
+program files directory
+
+add these three locations to path
+
+open cmake and put in path of source and build folder
+
+check/enter these: ** might have to click configure before finding CUDA_FAST_MATH and CUDA_ARCH_BIN
+
+
+"C:\Program Files\CMake\bin\cmake.exe" -H "D:\programming\fanduel-boggle-cheat\opencv" ^
+-D OPENCV_EXTRA_MODULES_PATH="D:\programming\fanduel-boggle-cheat\opencv_contrib" ^
+-B"D:\programming\fanduel-boggle-cheat\build" ^
+-G"Visual Studio 17 2022" ^
+-D INSTALL_TESTS=ON ^
+-D INSTALL_C_EXAMPLES=ON ^
+-D BUILD_EXAMPLES=ON ^
+-D BUILD_opencv_world=ON ^
+-D ENABLE_CUDA_FIRST_CLASS_LANGUAGE=ON ^
+-D WITH_CUDA=ON ^
+-D CUDA_GENERATION=Pascal ^
+-D BUILD_opencv_python3=ON ^
+-D ENABLE_FAST_MATH=ON ^
+-D CUDA_FAST_MATH=ON ^
+-D PYTHON3_INCLUDE_DIR=D:\programming\fanduel-boggle-cheat\.venv\Include ^
+-D PYTHON3_EXECUTABLE=D:\programming\fanduel-boggle-cheat\.venv\Scripts\python.exe ^
+-D PYTHON3_NUMPY_INCLUDE_DIRS=D:\programming\fanduel-boggle-cheat\.venv\Lib\site-packages\numpy\core\include ^
+-D PYTHON3_PACKAGES_PATH=D:\programming\fanduel-boggle-cheat\.venv\Lib\site-packages ^
+-D CUDA_TOOLKIT_ROOT_DIR="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.5" ^
+-D CUDNN_INCLUDE_DIR="C:\Program Files\NVIDIA\CUDNN\v9.1\include\12.4" ^
+-D CUDNN_LIBRARY="C:\Program Files\NVIDIA\CUDNN\v9.1\lib\12.4\x64\cudnn.lib"
+
+
+
