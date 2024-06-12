@@ -13,3 +13,6 @@ to create superuser:
   docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
 
 
+press n to reselect last tool
+
+

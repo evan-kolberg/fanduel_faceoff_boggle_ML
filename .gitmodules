@@ -4,3 +4,6 @@
 [submodule "pyggle"]
 	path = pyggle
 	url = https://github.com/evan-kolberg/pyggle.git
+[submodule "boggle-solver"]
+	path = boggle-solver
+	url = https://github.com/elfsternberg/boggle-solver.git
