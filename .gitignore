@@ -5,7 +5,7 @@ processed-boards/
 
 yolov8x.pt
 
-opencv/build/
+build/
 
 
 
