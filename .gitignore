@@ -1,4 +1,3 @@
-.venv/
 __pycache__/
 
 raw-boards/
@@ -6,7 +5,7 @@ processed-boards/
 
 yolov8x.pt
 
-build/
+opencv/build/
 
 
 

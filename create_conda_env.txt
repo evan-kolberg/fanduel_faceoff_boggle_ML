@@ -1,0 +1,3 @@
+conda create -n envname python=x.x anaconda
+
+CTRL + SHFT + P > Python: Select Interpreter > choose the env you just made
