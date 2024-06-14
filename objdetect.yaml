@@ -1,0 +1,7 @@
+train: D:/programming/fanduel-boggle-cheat/dataset/train/
+val:  D:/programming/fanduel-boggle-cheat/dataset/val/
+
+nc: 31
+
+names: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "DL", "DW", "TL", "TW", "SUBMIT"]
+

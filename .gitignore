@@ -1,12 +1,15 @@
 __pycache__/
 
 raw-boards/
-processed-boards/
+pre-processed-boards/
 
 yolov8m.pt
+yolov8n.pt
 
 opencv_contrib_python-4.10.0.82-cp37-abi3-win_amd64.whl
 
+dataset/train/images
+dataset/val/images
 
 
 

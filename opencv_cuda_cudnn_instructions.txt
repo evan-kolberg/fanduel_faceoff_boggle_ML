@@ -11,7 +11,7 @@ set conda environment in vscode
 
 then do `pip install <path to wheel file>
 
-
+don't install other cuda enabled libs like pytorch in the same env because opencv will be custom. it won't work- trust.
 
 
 
