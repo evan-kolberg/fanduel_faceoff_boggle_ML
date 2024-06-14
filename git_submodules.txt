@@ -1,0 +1,17 @@
+To add a submodule:
+
+git submodule add <link that ends with .git>
+
+To switch to a certain commit:
+
+cd <folder of submodule>
+git checkout 5f132adf3fdc8b5ab9b02fe0e4322ce71e247ad3
+
+to get that SHA, find it when looking at the comit page on github
+
+To go back to main head:
+
+git switch -
+
+
+

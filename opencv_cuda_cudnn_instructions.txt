@@ -1,0 +1,113 @@
+***This method worked. Lesson learned: don't try to reinvent the wheel... literally...
+
+The pre-built wheel worked here:
+https://github.com/cudawarped/opencv-python-cuda-wheels/releases/tag/4.10.0.82
+
+Install CUDA 12.5, cuDNN 9.1.1 as a tarball, and Nvidia Video Codec SDK 12.2
+
+Extract both the cuDNN and Nvidia zips. Move the folders in those folders to the CUDA 12.5 folder.
+
+set conda environment in vscode
+
+then do `pip install <path to wheel file>
+
+
+
+
+
+
+*****OUTDATED / KINDA BROKEN ASF*****
+--------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
+*** MAKE AN ANACONDA ENV ~ this doesn't work with regular python env's; they aren't complete
+
+as of 6/13/24, with cuda 12.5 and cudnn 9.1.1, you need a specific visual studio version or it won't build correctly
+https://github.com/opencv/opencv/issues/25689#issuecomment-2151447870
+
+So, install latest visual studio, then use this to downgrade (run cmd as administrator):
+"C:\Program Files (x86)\Microsoft Visual Studio\Installer\setup.exe" modify --installPath "C:\Program Files\Microsoft Visual Studio\2022\Community" --add Microsoft.VisualStudio.Component.VC.14.36.17.6.x86.x64 --passive
+
+add opencv and the contrib as git submodules (git submodule add ...)
+
+get cuda toolkit and then get the cuDNN files (using CUDA 12.5 and cuDNN 9.1.1)
+
+run the cuda installer. Donwload the tarball version of cudnn. Put the three folders in the cuda 12.5 folder.
+
+Install the Nvidia Video Codec SDK 12.2 files and put the Interface folder in the CUDA 12.5 folder.
+
+make sure the locations are in path
+
+open cmake and put in path of source and build folder
+
+check/enter these: ** might have to click configure before finding some cuda options
+What to do in cmake: ***NOTE Click on `Advanced` ~ can't see some w/o it on
+
+Source: "D:/programming/fanduel-boggle-cheat/opencv" 
+Build folder: "D:\programming\fanduel-boggle-cheat\opencv\build" 
+Compiler: "Visual Studio 17 2022" 
+
+-OPENCV_EXTRA_MODULES_PATH="D:/programming/fanduel-boggle-cheat/opencv_contrib/modules"
+-PYTHON3_INCLUDE_DIR="C:/Users/evank/anaconda3/envs/opencv_cuda_cudnn/include"
+-PYTHON3_LIBRARY="C:/Users/evank/anaconda3/envs/opencv_cuda_cudnn/libs/python311.lib"
+-PYTHON3_EXECUTABLE="C:/Users/evank/anaconda3/envs/opencv_cuda_cudnn/python.exe"
+-PYTHON3_NUMPY_INCLUDE_DIRS="C:/Users/evank/anaconda3/envs/opencv_cuda_cudnn/Lib/site-packages/numpy/core/include"
+-PYTHON3_PACKAGES_PATH="C:/Users/evank/anaconda3/envs/opencv_cuda_cudnn/Lib/site-packages"
+-INSTALL_TESTS=ON 
+-INSTALL_C_EXAMPLES=ON 
+-BUILD_EXAMPLES=ON 
+-BUILD_opencv_world=ON 
+-WITH_CUDA=ON
+-ENABLE_FAST_MATH=ON
+-OPENCV_DNN_CUDA=ON
+-BUILD_opencv_dnn=ON
+-BUILD_opencv_python3=ON
+Configure, then (if it detects wrong verison of cuda, replace all 12.1 with 12.5 for ex):
+-CUDA_GENERATION=Pascal
+-CUDNN_LIBRARY="C:/Program Files/NVIDIA/CUDNN/v9.1/lib/12.4/x64/cudnn.lib"
+-ENABLE_CUDA_FIRST_CLASS_LANGUAGE=ON 
+-CUDA_FAST_MATH=ON 
+-CUDA_ARCH_BIN=7.5
+Configure, then:
+-CUDNN_INCLUDE_DIR="C:/Program Files/NVIDIA/CUDNN/v9.1/include/12.4"
+
+7.5 is the compute compatability for a 1660 ti
+
+Click on `Configure' - Pray to god there are no errors.
+
+Then click `Generate'
+
+Then click `Open Project'
+
+If Visual Studio prompts you to install some C++ stuff, do it
+
+Then change it from `Debug` to `Release'
+
+Then right-click on the ALL_BUILD file under CMakeTargets and click `Build'
+
+Pray to god there are no errors.
+
+Then right-click on the INSTALL file and click `Build`
+
+Pray to god there are no errors.
+
+
+========== Build: 601 succeeded, 0 failed, 0 up-to-date, 0 skipped ==========
+========== Build completed at 5:33 PM and took 31:58.271 minutes ==========
+
+========== Build: 3 succeeded, 1 failed, 598 up-to-date, 0 skipped ==========
+========== Build completed at 8:45 PM and took 01:19.460 minutes ==========
+
+
+****
+import os
+os.add_dll_directory("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.5\\bin")
+os.add_dll_directory("C:\\Program Files\\NVIDIA\\CUDNN\\v9.1\\bin\\12.4")
+import cv2
+
+
+that is the only way it works right
+even though we specified where those are in CMake, it doesn't properly pick em up
+so we manully do it before importing cv2
+
+*** IF you install pytorch with cuda in the same env, it permanently fucks it up
+

@@ -3,12 +3,9 @@ __pycache__/
 raw-boards/
 processed-boards/
 
-yolov8x.pt
+yolov8m.pt
 
-build/
-
-
-
+opencv_contrib_python-4.10.0.82-cp37-abi3-win_amd64.whl
 
 
 

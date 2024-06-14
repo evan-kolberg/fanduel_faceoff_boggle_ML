@@ -4,12 +4,6 @@
 [submodule "pyggle"]
 	path = pyggle
 	url = https://github.com/evan-kolberg/pyggle.git
-[submodule "boggle-solver"]
-	path = boggle-solver
-	url = https://github.com/elfsternberg/boggle-solver.git
-[submodule "opencv"]
-	path = opencv
-	url = https://github.com/opencv/opencv.git
-[submodule "opencv_contrib"]
-	path = opencv_contrib
-	url = https://github.com/opencv/opencv_contrib.git
+[submodule "opencv-python-cuda-wheels"]
+	path = opencv-python-cuda-wheels
+	url = https://github.com/cudawarped/opencv-python-cuda-wheels.git

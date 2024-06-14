@@ -1,0 +1,6 @@
+git reset HEAD~
+
+that command will 'reopen' a commit that you didn't push yet
+this way you won't lose the working changes
+
+
