@@ -17,6 +17,8 @@ for filename in os.listdir(input_folder_path):
         output_image_path = os.path.join(output_folder_path, os.path.splitext(filename)[0] + '_grayscale.png')
         
         with Image.open(input_image_path) as img:
+            if 'icc_profile' in img.info:
+                    del img.info['icc_profile']
             grayscale_img = img.convert('L') 
             grayscale_img = grayscale_img.resize((1024, 1024), Image.Resampling.LANCZOS)
             grayscale_img.save(output_image_path) 

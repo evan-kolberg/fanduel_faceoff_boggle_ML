@@ -15,7 +15,7 @@ def move_files_to_folder(files_list, destination_path):
 
 
 images = [os.path.join('pre-processed-boards/', x) for x in os.listdir('pre-processed-boards/') if x[-3:] == "png"]
-annotations = [os.path.join('annotations/', x) for x in os.listdir('annotations/') if x[-3:] == "txt"]
+annotations = [os.path.join('obj_train_data/', x) for x in os.listdir('obj_train_data/') if x[-3:] == "txt"]
 
 train_images, val_images, train_annotations, val_annotations = train_test_split(images,
                                                                                 annotations,

@@ -3,7 +3,7 @@ password: password
 
 start docker desktop
   cd cvat
-  docker exec -it cvat_server bash
+  docker compose up -d
 http://localhost:8080/
 
 
