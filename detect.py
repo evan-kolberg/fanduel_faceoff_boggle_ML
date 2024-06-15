@@ -3,7 +3,7 @@ import numpy as np
 import pyautogui
 from ultralytics import YOLO
 
-model = YOLO('runs/detect/boggle-model-8n/weights/best.pt')
+model = YOLO('runs/detect/boggle-model-8x/weights/best.pt')
 
 def capture_screen(bbox=(0, 0, 1024, 1024)):
     screen = np.array(pyautogui.screenshot(region=bbox))

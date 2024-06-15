@@ -11,4 +11,7 @@ opencv_contrib_python-4.10.0.82-cp37-abi3-win_amd64.whl
 dataset/train/images
 dataset/val/images
 
-runs/detect/boggle-model-8x
+runs/detect/boggle-model-8x/weights
+
+
+
