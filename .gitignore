@@ -1,17 +1,16 @@
 __pycache__/
 
-raw-boards/
-pre-processed-boards/
+OLD_DATA_BROKEN/raw-boards
 
 yolov8n.pt
 yolov8x.pt
 
 opencv_contrib_python-4.10.0.82-cp37-abi3-win_amd64.whl
 
-dataset/train/images
-dataset/val/images
+OLD_DATA_BROKEN/dataset/train/images
+OLD_DATA_BROKEN/dataset/val/images
 
 runs/detect/boggle-model-8x/weights
 
-
+raw_data
 

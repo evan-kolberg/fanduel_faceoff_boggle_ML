@@ -2,7 +2,13 @@
 
 ## Step 1: Prerequisites
 
+cuda 12.1
 
+install pytorch with cuda support
+
+install some caffeine into your body
+
+prepare for headaches and errors to no avail
 
 
 
