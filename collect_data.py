@@ -2,13 +2,14 @@ import cv2
 import numpy as np
 from PIL import ImageGrab
 import pygetwindow as gw
-from pynput import keyboard
 import os
+from pynput import keyboard
 import datetime
 
 TARGET_WINDOW_TITLE = "BlueStacks App Player"
 SCREENSHOTS_FOLDER = "data"
-CAPTURE_SIZE = 1024 # 1:1 aspect ratio
+CAPTURE_WIDTH = 544
+CAPTURE_HEIGHT = 928
 
 def capture_window(window_title):
     try:
@@ -17,10 +18,10 @@ def capture_window(window_title):
             center_x = window.left + window.width // 2
             center_y = window.top + window.height // 2
 
-            left = max(center_x - CAPTURE_SIZE // 2, 0)
-            top = max(center_y - CAPTURE_SIZE // 2, 0)
-            right = left + CAPTURE_SIZE
-            bottom = top + CAPTURE_SIZE
+            left = max(center_x - CAPTURE_WIDTH // 2, 0)
+            top = max(center_y - CAPTURE_HEIGHT // 2, 0)
+            right = left + CAPTURE_WIDTH
+            bottom = top + CAPTURE_HEIGHT
 
             img = ImageGrab.grab(bbox=(left, top, right, bottom))
             img_np = np.array(img)

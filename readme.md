@@ -23,6 +23,6 @@ Beware list:
 - Make sure to use conda environments. Before, I was just doing the python -m venv venv technique and I wasn't able to switch versions. Plus it didn't come with some library directory that I needed. Just use conda, it makes life easier.
 - i messed up with a whole dataset. it was crap. i spent days labeling 100 images with in total, around 1900 individual annotations. I took screenshots on mac but each screenshot had a completely random size and aspect ratio. yeah, they were all resized to 1024x1024, but the content in them was stretched in weird ways. don't do this. just use opencv to get images with the correct aspect ratio so you don't have to worry about this augmentation. sometimes augmentation is good, but we don't want that much when we only have 100 images. also, the game that is running isn't going to be augmented, so there's not really a point to teaching it how to detect with this level of robustness.
 - if torch is unable to locate your labels because it thinks that they're background files, then your file names are messed up. learned that mistake. took screenshots on mac and they got weird space characters in them. spent a while tryna figure this one out.
-
+- using 544x928 for new model resolution. turn off ads in blustacks, adjust window size until it fits well (check with detect.py), close sidebar, make phone in vertical orientation, then fix window size.
 
 
