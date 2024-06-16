@@ -16,7 +16,7 @@ don't install other cuda enabled libs like pytorch in the same env because openc
 
 
 
-*****OUTDATED / KINDA BROKEN ASF*****
+*****NOT FOR THE FAINT OF HEART*****
 --------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
 *** MAKE AN ANACONDA ENV ~ this doesn't work with regular python env's; they aren't complete

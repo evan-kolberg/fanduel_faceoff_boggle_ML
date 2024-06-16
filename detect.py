@@ -23,7 +23,7 @@ def capture_window(window_title):
 
             img = ImageGrab.grab(bbox=(left, top, right, bottom))
             img_np = np.array(img)
-            frame = cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB)
+            frame = cv2.cvtColor(img_np, cv2.COLOR_BGR2GRAY)
             return frame
     except IndexError:
         print(f"No window found with title: {window_title}")
@@ -45,7 +45,7 @@ def main():
                 class_ids = result.boxes.cls.cpu().numpy()
 
                 for box, score, class_id in zip(boxes, scores, class_ids):
-                    if score > 0.3:
+                    if score > 0.5:
                         x1, y1, x2, y2 = map(int, box)
                         cv2.rectangle(screen, (x1, y1), (x2, y2), (0, 255, 0), 2)
                         label = f'{class_id}: {int(score * 100)}%'
