@@ -1,9 +1,0 @@
-
-
-CLIP is the answer
-
-steps:
-
-1) have user click top left and then bottom right
-2) using these coords, get that region of screen
-3) 

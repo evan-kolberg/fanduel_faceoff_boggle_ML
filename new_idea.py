@@ -176,7 +176,7 @@ if __name__ == '__main__':
 
     letters = []
     for index, piece in enumerate(image_pieces):
-        scores = compareAllImages(piece, "binary_letters")
+        scores = compareAllImages(piece, "control_group")
         print(scores)
         most_similar_letter = get_most_similar_letter(scores)
         letters.append(most_similar_letter)
