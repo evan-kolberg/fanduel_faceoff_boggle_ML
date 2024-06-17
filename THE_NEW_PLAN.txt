@@ -1,7 +1,6 @@
 
 
-
-CLIP based processing for image simularity
+CLIP is the answer
 
 steps:
 
