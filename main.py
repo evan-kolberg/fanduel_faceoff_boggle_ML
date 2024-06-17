@@ -95,10 +95,11 @@ def classify_and_store_bonus_tiles(color_pieces: List[np.ndarray]) -> Dict[str, 
     bonus_tiles = {'DL': [], 'DW': [], 'TL': [], 'TW': []}
     for i, piece in enumerate(color_pieces):
         avg_color = get_average_color(piece)
+        print(f"Piece {i} average color:", avg_color)
         x, y = i % 4, i // 4
         if np.allclose(avg_color, [240, 190, 20], atol=20):
             bonus_tiles['DL'].append((x, y))
-        elif np.allclose(avg_color, [90, 195, 20], atol=20):
+        elif np.allclose(avg_color, [120, 210, 15], atol=20):
             bonus_tiles['DW'].append((x, y))
         elif np.allclose(avg_color, [245, 100, 55], atol=20):
             bonus_tiles['TL'].append((x, y))
@@ -106,7 +107,11 @@ def classify_and_store_bonus_tiles(color_pieces: List[np.ndarray]) -> Dict[str, 
             bonus_tiles['TW'].append((x, y))
     return bonus_tiles
 
-def calculate_word_score(word, coords, board, bonus_tiles, letter_points) -> int:
+def calculate_word_score(word: str, 
+                         coords: Tuple[int, int], 
+                         board: List[List[str]], 
+                         bonus_tiles: Dict[str, int], 
+                         letter_points: Dict[str, int]) -> int:
     word_score = 0
     word_multipliers = []
     for (x, y) in coords:
