@@ -1,20 +1,25 @@
 __pycache__/
 
-OLD_DATA_BROKEN/raw-boards/
+ARCHIVE_OLD_DATA_BROKEN/raw-boards/
 
 yolov8n.pt
 yolov8x.pt
 
 opencv_contrib_python-4.10.0.82-cp37-abi3-win_amd64.whl
 
-OLD_DATA_BROKEN/dataset/train/images/
-OLD_DATA_BROKEN/dataset/val/images/
+ARCHIVE_OLD_DATA_BROKEN/dataset/train/images/
+ARCHIVE-OLD_DATA_BROKEN/dataset/val/images/
 
-OLD_DATA_BROKEN/boggle-model-8x/weights
+ARCHIVE_OLD_DATA_BROKEN/boggle-model-8x/weights
 
 data.bad/
 
 data/
 dataset/train/images
 dataset/val/images
+
+ARCHIVE_OLD_DATA_BROKEN/dataset/train/images
+ARCHIVE_OLD_DATA_BROKEN/dataset/val/images
+
+ARCHIVE_OLD_DATA_BROKEN/boggle-model-8x/weights
 

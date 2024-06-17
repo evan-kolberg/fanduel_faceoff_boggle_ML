@@ -27,7 +27,7 @@ def main(letters_folder, output_file, overlay_folder):
     region = select_capture_region()
     img = capture_screen_region(region)
     
-    captured_image_path = "capture/captured_board.png"
+    captured_image_path = ""
     save_captured_image(img, "capture", "captured_board.png")
     
     board, color_grid, cells = split_and_process_image(captured_image_path, letter_images, masks, color_ranges, overlay_folder)
@@ -55,8 +55,8 @@ def main(letters_folder, output_file, overlay_folder):
 
 
 if __name__ == "__main__":
-    letters_folder = "assets/letters"
-    output_file = "output.txt"
-    overlay_folder = "overlays"
+    letters_folder = ""
+    output_file = ""
+    overlay_folder = ""
     main(letters_folder, output_file, overlay_folder)
 
