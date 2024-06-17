@@ -1,15 +1,18 @@
 import os
 import cv2
+import math
+import time
 import torch
 import open_clip
+import pyautogui
 import numpy as np
 from PIL import Image, ImageGrab
 from pynput import mouse, keyboard
 from sentence_transformers import util
 from pynput.keyboard import Key, KeyCode
+from pynput.mouse import Controller, Button
 from typing import List, Tuple, Union, Dict
 from pyggle.lib.pyggle import Boggle, boggle
-
 
 def imageEncoder(img: np.ndarray) -> torch.Tensor:
     img1 = Image.fromarray(img).convert('RGB')
@@ -97,9 +100,9 @@ def classify_and_store_bonus_tiles(color_pieces: List[np.ndarray]) -> Dict[str, 
         avg_color = get_average_color(piece)
         print(f"Piece {i} average color:", avg_color)
         x, y = i % 4, i // 4
-        if np.allclose(avg_color, [240, 190, 20], atol=20):
+        if np.allclose(avg_color, [230, 190, 55], atol=20):
             bonus_tiles['DL'].append((x, y))
-        elif np.allclose(avg_color, [120, 210, 15], atol=20):
+        elif np.allclose(avg_color, [100, 180, 55], atol=20):
             bonus_tiles['DW'].append((x, y))
         elif np.allclose(avg_color, [245, 100, 55], atol=20):
             bonus_tiles['TL'].append((x, y))
@@ -135,6 +138,29 @@ def calculate_word_score(word: str,
         word_score += bonus_points
     return word_score
 
+def get_word_screen_coords(word: str, board_coords: list[tuple], top_left: tuple, bottom_right: tuple) -> list[tuple]:
+    box_width = (bottom_right[0] - top_left[0]) // 4
+    box_height = (bottom_right[1] - top_left[1]) // 4
+    print(f"Box width: {box_width}, Box height: {box_height}")
+    word_screen_coords = []
+    print(board_coords)
+    for coord in board_coords:
+        screen_x = coord[0] * box_width + box_width // 2 + top_left[0]
+        screen_y = coord[1] * box_height + box_height // 2 + top_left[1]
+        print(f"Screen coordinates for {coord}: ({screen_x}, {screen_y})")
+        word_screen_coords.append((screen_x, screen_y))
+    return word_screen_coords
+
+def glide_mouse_to_position(end: tuple, duration: float = 2.0, amplitude: float = 10.0, frequency: float = 5.0):
+    start = pyautogui.position()
+    steps = int(duration * 100)
+    for i in range(steps):
+        t = i / steps
+        x = start[0] + (end[0] - start[0]) * t + amplitude * math.sin(2 * math.pi * frequency * t)
+        y = start[1] + (end[1] - start[1]) * t + amplitude * math.cos(2 * math.pi * frequency * t)
+        pyautogui.moveTo(x, y, duration / steps)
+        time.sleep(duration / steps)
+
 def on_press(key: Union[Key, KeyCode]) -> None: # callback function
     if key == keyboard.Key.enter:
         print('Enter key pressed. Current mouse position is:', mouse_controller.position)
@@ -148,61 +174,82 @@ if __name__ == '__main__':
         'U': 1, 'V': 4, 'W': 4, 'X': 8, 'Y': 4, 'Z': 10
     }
 
-    mouse_positions = []
-    mouse_controller = mouse.Controller()
-    keyboard_listener = keyboard.Listener(on_press=on_press)
-    keyboard_listener.start()
-
-    while len(mouse_positions) < 2: pass
-
-    top_left = mouse_positions[0]
-    bottom_right = mouse_positions[1]
-    print('First mouse position:', mouse_positions[0])
-    print('Second mouse position:', mouse_positions[1])
-    keyboard_listener.stop()
-
-    region = capture_screen_region_for_comparison(top_left, bottom_right)
-
-    image_pieces = split_image_into_4x4_grid(region)
-    image_pieces = binary_image_pieces(image_pieces)
-    save_images(image_pieces, "pieces_output")
-
-    color_region = capture_screen_region_for_colors(top_left, bottom_right)
-    color_pieces = split_image_into_4x4_grid(color_region)
-    save_images(color_pieces, "color_pieces_output")
-    bonus_tiles = classify_and_store_bonus_tiles(color_pieces)
-
     print('Loading model...')
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print('Using device:', torch.cuda.get_device_name(0))
-    model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-16-plus-240', pretrained="laion400m_e32")
+    model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-16-plus-240', pretrained='laion400m_e32')
     model.to(device)
     print('Model loaded.')
 
-    letters = []
-    for index, piece in enumerate(image_pieces):
-        scores = compareAllImages(piece, "control_group")
-        most_similar_letter, highest_score = get_most_similar_letter(scores)
-        letters.append(most_similar_letter)
-        print('Most similar letter:', most_similar_letter, 'with score:', highest_score)
+    while True:
+        mouse_positions = []
+        mouse_controller = mouse.Controller()
+        keyboard_listener = keyboard.Listener(on_press=on_press)
+        keyboard_listener.start()
+        print('Listening...')
 
-    board = list_to_board(letters)
-    print('Board:', board)
-    print('Bonus tiles:', bonus_tiles)
+        while len(mouse_positions) < 2: pass
 
-    boggle = Boggle(board)
-    solved = boggle.solve()
-    print(solved)
+        top_left = mouse_positions[0]
+        bottom_right = mouse_positions[1]
+        print('First mouse position:', mouse_positions[0])
+        print('Second mouse position:', mouse_positions[1])
+        keyboard_listener.stop()
+        print('Positions captured.')
 
-    word_scores = []
-    for word, coords in solved.items():
-        score = calculate_word_score(word, coords, board, bonus_tiles, letter_points)
-        word_scores.append((word, score))
+        region = capture_screen_region_for_comparison(top_left, bottom_right)
 
-    word_scores.sort(key=lambda x: x[1], reverse=True)
+        image_pieces = split_image_into_4x4_grid(region)
+        image_pieces = binary_image_pieces(image_pieces)
+        save_images(image_pieces, "pieces_output")
 
-    for word, score in word_scores:
-        print(f"{word}: {score}")
+        color_region = capture_screen_region_for_colors(top_left, bottom_right)
+        color_pieces = split_image_into_4x4_grid(color_region)
+        save_images(color_pieces, "color_pieces_output")
+        bonus_tiles = classify_and_store_bonus_tiles(color_pieces)
+
+        letters = []
+        for index, piece in enumerate(image_pieces):
+            scores = compareAllImages(piece, "control_group")
+            most_similar_letter, highest_score = get_most_similar_letter(scores)
+            letters.append(most_similar_letter)
+            print('Most similar letter:', most_similar_letter, 'with score:', highest_score)
+
+        board = list_to_board(letters)
+        print('Board:', board)
+        print('Bonus tiles:', bonus_tiles)
+
+        boggle = Boggle(board)
+        solved = boggle.solve()
+        print(solved)
+
+        word_scores = []
+        for word, coords in solved.items():
+            score = calculate_word_score(word, coords, board, bonus_tiles, letter_points)
+            word_scores.append((word, score))
+
+        word_scores.sort(key=lambda x: x[1], reverse=False)
+
+        for word, score in word_scores:
+            print(f"{word}: {score}")
+        
+        word_scores.sort(key=lambda x: x[1], reverse=True)
+
+        mouse_controller = Controller()
+        for word, score in word_scores:
+            print(f"Entering word: {word} with score: {score}")
+            board_coords = solved[word]
+            word_screen_coords = get_word_screen_coords(word, board_coords, top_left, bottom_right)
+            print(f"Word screen coordinates: {word_screen_coords}")
+            
+            mouse_controller.position = word_screen_coords[0]
+            mouse_controller.press(Button.left)
+            for coord in word_screen_coords[1:]:
+                glide_mouse_to_position(coord, duration=0.5, amplitude=10.0, frequency=5.0)
+            mouse_controller.release(Button.left)
+            time.sleep(1)
+
+            exit()
 
 
 
