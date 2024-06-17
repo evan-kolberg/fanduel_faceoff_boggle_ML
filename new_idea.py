@@ -5,9 +5,9 @@ import open_clip
 import numpy as np
 from PIL import Image, ImageGrab
 from pynput import mouse, keyboard
-from typing import List, Tuple, Union
 from sentence_transformers import util
 from pynput.keyboard import Key, KeyCode
+from typing import List, Tuple, Union, Dict
 from pyggle.lib.pyggle import Boggle, boggle
 
 
@@ -37,8 +37,8 @@ def capture_screen_region_for_colors(top_left: tuple, bottom_right: tuple) -> np
     img = ImageGrab.grab(bbox=(top_left[0], top_left[1], bottom_right[0], bottom_right[1]))
     open_cv_image = np.array(img) 
     open_cv_image = open_cv_image[:, :, ::-1].copy() 
-    hsv_image = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2HSV)
-    return np.array(hsv_image)
+    color_image = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
+    return np.array(color_image)
 
 def capture_screen_region_for_comparison(top_left: tuple, bottom_right: tuple) -> np.ndarray:
     img = ImageGrab.grab(bbox=(top_left[0], top_left[1], bottom_right[0], bottom_right[1]))
@@ -67,16 +67,15 @@ def get_most_similar_letter(scores: List[Tuple[str, float]]) -> str:
 
 def binary_image_pieces(image_pieces: List[np.ndarray]) -> List[np.ndarray]:
     processed_pieces = []
+    lower_black = np.array([0, 0, 0], dtype = "uint8")
+    upper_black = np.array([50, 50, 50], dtype = "uint8")
     for piece in image_pieces:
-        gray_image = cv2.cvtColor(piece, cv2.COLOR_BGR2GRAY)
-        _, binary_image = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        processed_pieces.append(binary_image)
+        mask = cv2.inRange(piece, lower_black, upper_black)
+        processed_pieces.append(mask)
     return processed_pieces
 
-def save_images(image_pieces: List[np.ndarray]) -> None:
-    output_dir = "pieces_output"
+def save_images(image_pieces: List[np.ndarray], output_dir: str) -> None:
     os.makedirs(output_dir, exist_ok=True)
-
     for i, piece in enumerate(image_pieces):
         output_path = os.path.join(output_dir, f"piece_{i}.png")
         cv2.imwrite(output_path, piece)
@@ -84,6 +83,52 @@ def save_images(image_pieces: List[np.ndarray]) -> None:
 def list_to_board(lst: list) -> list[list: str]:
     return [lst[i*4 : i*4 + 4] for i in range(4)]
 
+def get_average_color(image: np.ndarray, k: int = 3) -> np.ndarray:
+    pixels = image.reshape(-1, 3).astype(np.float32)
+    _, labels, centers = cv2.kmeans(pixels, k, None, 
+                                    (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2), 
+                                    10, cv2.KMEANS_RANDOM_CENTERS)
+    average_color = centers[np.argmax(np.bincount(labels.flatten()))]
+    return average_color
+
+def classify_and_store_bonus_tiles(color_pieces: List[np.ndarray]) -> Dict[str, List[Tuple[int, int]]]:
+    bonus_tiles = {'TL': [], 'DL': [], 'DW': [], 'TW': []}
+    for i, piece in enumerate(color_pieces):
+        avg_color = get_average_color(piece)
+        x, y = i % 4, i // 4
+        if np.allclose(avg_color, [238, 192, 21], atol=10):
+            bonus_tiles['DL'].append((x, y))
+        elif np.allclose(avg_color, [86, 192, 20], atol=10):
+            bonus_tiles['DW'].append((x, y))
+        elif np.allclose(avg_color, [244, 97, 56], atol=10):
+            bonus_tiles['TL'].append((x, y))
+        elif np.allclose(avg_color, [146, 99, 232], atol=10):
+            bonus_tiles['TW'].append((x, y))
+    return bonus_tiles
+
+def calculate_word_score(word, coords, board, bonus_tiles, letter_points) -> int:
+    word_score = 0
+    word_multipliers = []
+    for (x, y) in coords:
+        letter = board[x][y]
+        base_score = letter_points[letter]
+        for bonus, positions in bonus_tiles.items():
+            if (x, y) in positions:
+                if bonus == 'TL':
+                    base_score *= 3
+                elif bonus == 'DL':
+                    base_score *= 2
+                elif bonus == 'TW':
+                    word_multipliers.append(3)
+                elif bonus == 'DW':
+                    word_multipliers.append(2)
+        word_score += base_score
+    for multiplier in word_multipliers:
+        word_score *= multiplier
+    if len(word) >= 5:
+        bonus_points = (len(word) - 4) * 5
+        word_score += bonus_points
+    return word_score
 
 def on_press(key: Union[Key, KeyCode]) -> None: # callback function
     if key == keyboard.Key.enter:
@@ -98,13 +143,6 @@ if __name__ == '__main__':
         'U': 1, 'V': 4, 'W': 4, 'X': 8, 'Y': 4, 'Z': 10
     }
 
-    bonus_tiles = {
-        'TL': [],
-        'DL': [],
-        'TW': [],
-        'DW': []
-    }
-
     mouse_positions = []
     mouse_controller = mouse.Controller()
     keyboard_listener = keyboard.Listener(on_press=on_press)
@@ -116,17 +154,18 @@ if __name__ == '__main__':
     bottom_right = mouse_positions[1]
     print('First mouse position:', mouse_positions[0])
     print('Second mouse position:', mouse_positions[1])
-
     keyboard_listener.stop()
 
     region = capture_screen_region_for_comparison(top_left, bottom_right)
-    #cv2.imshow('Captured screen region', region)
-    #cv2.waitKey(0)
 
     image_pieces = split_image_into_4x4_grid(region)
     image_pieces = binary_image_pieces(image_pieces)
-    save_images(image_pieces)
+    save_images(image_pieces, "pieces_output")
 
+    color_region = capture_screen_region_for_colors(top_left, bottom_right)
+    color_pieces = split_image_into_4x4_grid(color_region)
+    save_images(color_pieces, "color_pieces_output")
+    bonus_tiles = classify_and_store_bonus_tiles(color_pieces)
 
     print('Loading model...')
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -134,7 +173,6 @@ if __name__ == '__main__':
     model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-16-plus-240', pretrained="laion400m_e32")
     model.to(device)
     print('Model loaded.')
-
 
     letters = []
     for index, piece in enumerate(image_pieces):
@@ -147,12 +185,21 @@ if __name__ == '__main__':
     board = list_to_board(letters)
 
     print('Board:', board)
-
+    print('Bonus tiles:', bonus_tiles)
 
     boggle = Boggle(board)
     solved = boggle.solve()
     print(solved)
 
+    word_scores = []
+    for word, coords in solved.items():
+        score = calculate_word_score(word, coords, board, bonus_tiles, letter_points)
+        word_scores.append((word, score))
+
+    word_scores.sort(key=lambda x: x[1], reverse=True)
+
+    for word, score in word_scores:
+        print(f"{word}: {score}")
 
 
 
