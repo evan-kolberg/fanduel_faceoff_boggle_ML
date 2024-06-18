@@ -13,41 +13,51 @@ from pynput.keyboard import Key, KeyCode
 from pynput.mouse import Controller, Button
 from typing import List, Tuple, Union, Dict
 from pyggle.lib.pyggle import Boggle, boggle
+from concurrent.futures import ThreadPoolExecutor
 from scipy.interpolate import CubicSpline, interp1d
 
 def imageEncoder(img: np.ndarray) -> torch.Tensor:
     img1 = Image.fromarray(img).convert('RGB')
     img1 = preprocess(img1).unsqueeze(0).to(device)
-    img1 = model.encode_image(img1)
+    with torch.no_grad():
+        img1 = model.encode_image(img1)
     return img1
 
 def generateScore(img1: np.ndarray, img2: np.ndarray) -> float:
     img1, img2 = map(imageEncoder, (img1, img2))
     cos_scores = util.pytorch_cos_sim(img1, img2)
-    score = round(float(cos_scores[0][0])*100, 2)
+    score = round(float(cos_scores[0][0]) * 100, 2)
     return score
 
 def compareAllImages(img: np.ndarray, directory: str) -> List[Tuple[str, float]]:
+    img1 = imageEncoder(img)
     scores = []
-    for filename in os.listdir(directory):
-        if filename.endswith(".png"):
-            image_path = os.path.join(directory, filename)
-            img2 = cv2.imread(image_path)
-            score = generateScore(img, img2)
-            scores.append((filename, score))
+    filenames = [f for f in os.listdir(directory) if f.endswith('.png')]
+
+    def process_image(filename):
+        image_path = os.path.join(directory, filename)
+        img2 = cv2.imread(image_path)
+        img2_tensor = imageEncoder(img2)
+        cos_scores = util.pytorch_cos_sim(img1, img2_tensor)
+        score = round(float(cos_scores[0][0]) * 100, 2)
+        return filename, score
+
+    with ThreadPoolExecutor() as executor:
+        scores = list(executor.map(process_image, filenames))
+
     return scores
 
 def capture_screen_region_for_colors(top_left: tuple, bottom_right: tuple) -> np.ndarray:
     img = ImageGrab.grab(bbox=(top_left[0], top_left[1], bottom_right[0], bottom_right[1]))
-    open_cv_image = np.array(img) 
-    open_cv_image = open_cv_image[:, :, ::-1].copy() 
+    open_cv_image = np.array(img)
+    open_cv_image = open_cv_image[:, :, ::-1].copy()
     color_image = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
     return np.array(color_image)
 
 def capture_screen_region_for_comparison(top_left: tuple, bottom_right: tuple) -> np.ndarray:
     img = ImageGrab.grab(bbox=(top_left[0], top_left[1], bottom_right[0], bottom_right[1]))
-    open_cv_image = np.array(img) 
-    open_cv_image = open_cv_image[:, :, ::-1].copy() 
+    open_cv_image = np.array(img)
+    open_cv_image = open_cv_image[:, :, ::-1].copy()
     return open_cv_image
 
 def split_image_into_4x4_grid(image: np.ndarray) -> list[np.ndarray]:
@@ -71,8 +81,8 @@ def get_most_similar_letter(scores: List[Tuple[str, float]]) -> Tuple[str, float
 
 def binary_image_pieces(image_pieces: List[np.ndarray]) -> List[np.ndarray]:
     processed_pieces = []
-    lower_black = np.array([0, 0, 0], dtype = "uint8")
-    upper_black = np.array([50, 50, 50], dtype = "uint8")
+    lower_black = np.array([0, 0, 0], dtype="uint8")
+    upper_black = np.array([50, 50, 50], dtype="uint8")
     for piece in image_pieces:
         mask = cv2.inRange(piece, lower_black, upper_black)
         processed_pieces.append(mask)
@@ -84,13 +94,13 @@ def save_images(image_pieces: List[np.ndarray], output_dir: str) -> None:
         output_path = os.path.join(output_dir, f"piece_{i}.png")
         cv2.imwrite(output_path, piece)
 
-def list_to_board(lst: list) -> list[list: str]:
-    return [lst[i*4 : i*4 + 4] for i in range(4)]
+def list_to_board(lst: list) -> list[list[str]]:
+    return [lst[i * 4: i * 4 + 4] for i in range(4)]
 
 def get_average_color(image: np.ndarray, k: int = 3) -> np.ndarray:
     pixels = image.reshape(-1, 3).astype(np.float32)
-    _, labels, centers = cv2.kmeans(pixels, k, None, 
-                                    (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2), 
+    _, labels, centers = cv2.kmeans(pixels, k, None,
+                                    (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2),
                                     10, cv2.KMEANS_RANDOM_CENTERS)
     average_color = centers[np.argmax(np.bincount(labels.flatten()))]
     return average_color
@@ -111,10 +121,10 @@ def classify_and_store_bonus_tiles(color_pieces: List[np.ndarray]) -> Dict[str, 
             bonus_tiles['TW'].append((x, y))
     return bonus_tiles
 
-def calculate_word_score(word: str, 
-                         coords: Tuple[int, int], 
-                         board: List[List[str]], 
-                         bonus_tiles: Dict[str, int], 
+def calculate_word_score(word: str,
+                         coords: Tuple[int, int],
+                         board: List[List[str]],
+                         bonus_tiles: Dict[str, int],
                          letter_points: Dict[str, int]) -> int:
     word_score = 0
     word_multipliers = []
