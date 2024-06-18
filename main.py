@@ -33,7 +33,6 @@ def compareAllImages(img: np.ndarray, directory: str) -> List[Tuple[str, float]]
     img1 = imageEncoder(img)
     scores = []
     filenames = [f for f in os.listdir(directory) if f.endswith('.png')]
-
     def process_image(filename):
         image_path = os.path.join(directory, filename)
         img2 = cv2.imread(image_path)
@@ -41,10 +40,8 @@ def compareAllImages(img: np.ndarray, directory: str) -> List[Tuple[str, float]]
         cos_scores = util.pytorch_cos_sim(img1, img2_tensor)
         score = round(float(cos_scores[0][0]) * 100, 2)
         return filename, score
-
     with ThreadPoolExecutor() as executor:
         scores = list(executor.map(process_image, filenames))
-
     return scores
 
 def capture_screen_region_for_colors(top_left: tuple, bottom_right: tuple) -> np.ndarray:
@@ -170,7 +167,7 @@ def get_word_screen_coords(word: str, board_coords: list[tuple], top_left: tuple
         word_screen_coords.append((screen_x, screen_y))
     return word_screen_coords
 
-def glide_mouse_to_positions(word_screen_coords: list[tuple], duration: float = 2.0, steps_multiplier: int = 3, glide: bool = True) -> None:
+def glide_mouse_to_positions(word_screen_coords: list[tuple], duration: float = 2.0, steps_multiplier_if_gliding: int = 3, glide: bool = True) -> None:
     if not glide:
         for coord in word_screen_coords:
             pyautogui.moveTo(coord[0], coord[1], duration)
@@ -181,7 +178,7 @@ def glide_mouse_to_positions(word_screen_coords: list[tuple], duration: float = 
         y = [coord[1] for coord in word_screen_coords]
         t = np.arange(len(word_screen_coords))
         cs = CubicSpline(t, np.c_[x, y], bc_type='clamped')
-        steps = steps_multiplier * len(word_screen_coords)
+        steps = steps_multiplier_if_gliding * len(word_screen_coords)
         for i in np.linspace(0, len(word_screen_coords) - 1, steps):
             pyautogui.moveTo(cs(i)[0], cs(i)[1], duration)
             time.sleep(duration / steps)
@@ -192,7 +189,7 @@ def glide_mouse_to_positions(word_screen_coords: list[tuple], duration: float = 
         t = np.linspace(0, 1, len(word_screen_coords))
         fx = interp1d(t, x, kind='linear')
         fy = interp1d(t, y, kind='linear')
-        steps = steps_multiplier * len(word_screen_coords)
+        steps = steps_multiplier_if_gliding * len(word_screen_coords)
         for i in np.linspace(0, 1, steps):
             pyautogui.moveTo(fx(i), fy(i), duration)
             time.sleep(duration / steps)
@@ -204,6 +201,15 @@ def on_press(key: Union[Key, KeyCode]) -> None: # callback function
     if key == Key.shift:
         print('Shift key pressed. Exiting...')
         exit()
+
+def get_words_until_min_letters(word_scores, min_letters):
+    total_letters = 0
+    for i, (word, _) in enumerate(word_scores):
+        total_letters += len(word)
+        if total_letters >= min_letters:
+            return word_scores[:i+1]
+    return word_scores
+        
 
 if __name__ == '__main__':
     logging.basicConfig(filename='scoring_debug.log', level=logging.DEBUG)
@@ -227,7 +233,7 @@ if __name__ == '__main__':
 
     while True:
         mouse_positions = []
-        print('Listening...')
+        print('Listening for Enter key...')
 
         while len(mouse_positions) < 2: pass
 
@@ -275,8 +281,10 @@ if __name__ == '__main__':
         
         word_scores.sort(key=lambda x: x[1], reverse=True)
 
-        mouse_controller = Controller()
-        for word, score in word_scores[:20]: # num of words to enter before next round
+        filtered_entries = get_words_until_min_letters(word_scores, 330) # minumum letters to enter, rounds up a word
+        print("Filtered entries:", filtered_entries)
+
+        for word, score in filtered_entries: # num of words to enter before next round
             print(f"Entering word: {word} with score: {score}")
             board_coords = solved[word]
             word_screen_coords = get_word_screen_coords(word, board_coords, top_left, bottom_right)
@@ -284,7 +292,7 @@ if __name__ == '__main__':
             
             mouse_controller.position = word_screen_coords[0]
             mouse_controller.press(Button.left)
-            glide_mouse_to_positions(word_screen_coords, duration=0, steps_multiplier=3, glide=True)
+            glide_mouse_to_positions(word_screen_coords, duration=0, steps_multiplier_if_gliding=3, glide=False) # glide = False means instantly go to each coord
             mouse_controller.release(Button.left)
             time.sleep(0.1)
 
