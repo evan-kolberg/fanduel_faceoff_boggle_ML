@@ -157,9 +157,7 @@ def calculate_word_score(word: str,
 def get_word_screen_coords(word: str, board_coords: list[tuple], top_left: tuple, bottom_right: tuple) -> list[tuple]:
     box_width = (bottom_right[0] - top_left[0]) // 4
     box_height = (bottom_right[1] - top_left[1]) // 4
-    print(f"Box width: {box_width}, Box height: {box_height}")
     word_screen_coords = []
-    print(board_coords)
     for coord in board_coords:
         screen_x = coord[0] * box_width + box_width // 2 + top_left[0]
         screen_y = coord[1] * box_height + box_height // 2 + top_left[1]
