@@ -13,6 +13,7 @@ from pynput.keyboard import Key, KeyCode
 from pynput.mouse import Controller, Button
 from typing import List, Tuple, Union, Dict
 from pyggle.lib.pyggle import Boggle, boggle
+from scipy.interpolate import CubicSpline, interp1d
 
 def imageEncoder(img: np.ndarray) -> torch.Tensor:
     img1 = Image.fromarray(img).convert('RGB')
@@ -118,7 +119,7 @@ def calculate_word_score(word: str,
     word_score = 0
     word_multipliers = []
     for (x, y) in coords:
-        letter = board[x][y]
+        letter = board[y][x]
         base_score = letter_points[letter]
         for bonus, positions in bonus_tiles.items():
             if (x, y) in positions:
@@ -151,18 +152,31 @@ def get_word_screen_coords(word: str, board_coords: list[tuple], top_left: tuple
         word_screen_coords.append((screen_x, screen_y))
     return word_screen_coords
 
-def glide_mouse_to_position(end: tuple, duration: float = 2.0, amplitude: float = 10.0, frequency: float = 5.0):
-    start = pyautogui.position()
-    steps = int(duration * 100)
-    for i in range(steps):
-        t = i / steps
-        x = start[0] + (end[0] - start[0]) * t + amplitude * math.sin(2 * math.pi * frequency * t)
-        y = start[1] + (end[1] - start[1]) * t + amplitude * math.cos(2 * math.pi * frequency * t)
-        pyautogui.moveTo(x, y, duration / steps)
-        time.sleep(duration / steps)
+def glide_mouse_to_positions(word_screen_coords: list[tuple], duration: float = 2.0):
+    if len(word_screen_coords) >= 4:
+        # Use Catmull-Rom spline
+        x = [coord[0] for coord in word_screen_coords]
+        y = [coord[1] for coord in word_screen_coords]
+        t = np.arange(len(word_screen_coords))
+        cs = CubicSpline(t, np.c_[x, y], bc_type='clamped')
+        steps = int(duration * 100)
+        for i in np.linspace(0, len(word_screen_coords) - 1, steps):
+            pyautogui.moveTo(cs(i)[0], cs(i)[1], duration / steps)
+            time.sleep(duration / steps)
+    else:
+        # Use interpolation
+        x = [coord[0] for coord in word_screen_coords]
+        y = [coord[1] for coord in word_screen_coords]
+        t = np.linspace(0, 1, len(word_screen_coords))
+        fx = interp1d(t, x, kind='linear')
+        fy = interp1d(t, y, kind='linear')
+        steps = int(duration * 1000)
+        for i in np.linspace(0, 1, steps):
+            pyautogui.moveTo(fx(i), fy(i), duration / steps)
+            time.sleep(duration / steps)
 
 def on_press(key: Union[Key, KeyCode]) -> None: # callback function
-    if key == keyboard.Key.enter:
+    if key == Key.enter:
         print('Enter key pressed. Current mouse position is:', mouse_controller.position)
         mouse_positions.append(mouse_controller.position)
 
@@ -236,7 +250,7 @@ if __name__ == '__main__':
         word_scores.sort(key=lambda x: x[1], reverse=True)
 
         mouse_controller = Controller()
-        for word, score in word_scores:
+        for word, score in word_scores[:12]: # num of words to enter before next round
             print(f"Entering word: {word} with score: {score}")
             board_coords = solved[word]
             word_screen_coords = get_word_screen_coords(word, board_coords, top_left, bottom_right)
@@ -244,14 +258,9 @@ if __name__ == '__main__':
             
             mouse_controller.position = word_screen_coords[0]
             mouse_controller.press(Button.left)
-            for coord in word_screen_coords[1:]:
-                glide_mouse_to_position(coord, duration=0.5, amplitude=10.0, frequency=5.0)
+            glide_mouse_to_positions(word_screen_coords, duration=0.15)
             mouse_controller.release(Button.left)
             time.sleep(1)
-
-            exit()
-
-
 
 
 
