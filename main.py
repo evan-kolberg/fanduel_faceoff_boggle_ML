@@ -281,10 +281,11 @@ if __name__ == '__main__':
         
         word_scores.sort(key=lambda x: x[1], reverse=True)
 
-        filtered_entries = get_words_until_min_letters(word_scores, 330) # minumum letters to enter, rounds up a word
+        # *** minumum letters to enter, rounds up a word *** #
+        filtered_entries = get_words_until_min_letters(word_scores, 350)
         print("Filtered entries:", filtered_entries)
 
-        for word, score in filtered_entries: # num of words to enter before next round
+        for word, score in filtered_entries:
             print(f"Entering word: {word} with score: {score}")
             board_coords = solved[word]
             word_screen_coords = get_word_screen_coords(word, board_coords, top_left, bottom_right)
@@ -292,7 +293,8 @@ if __name__ == '__main__':
             
             mouse_controller.position = word_screen_coords[0]
             mouse_controller.press(Button.left)
-            glide_mouse_to_positions(word_screen_coords, duration=0, steps_multiplier_if_gliding=3, glide=False) # glide = False means instantly go to each coord
+            # *** glide = False means instantly go to each coord *** #
+            glide_mouse_to_positions(word_screen_coords, duration=0, steps_multiplier_if_gliding=3, glide=False)
             mouse_controller.release(Button.left)
             time.sleep(0.1)
 
