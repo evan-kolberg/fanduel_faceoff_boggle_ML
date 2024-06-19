@@ -128,21 +128,23 @@ def calculate_word_score(word: str,
     for (x, y) in coords:
         letter = board[y][x]
         base_score = letter_points[letter]
+        logging.debug(f'Scoring: {word}...')
+        logging.debug(f'Coords: {coords}')
         logging.debug(f'Letter: {letter}, Base Score: {base_score}')
         for bonus, positions in bonus_tiles.items():
             if (x, y) in positions:
                 if bonus == 'TL':
                     base_score *= 3
-                    logging.debug(f'Applied TL bonus, new score: {base_score}')
+                    logging.debug(f'Applied TL bonus at: {(x,y)}, new score: {base_score}')
                 elif bonus == 'DL':
                     base_score *= 2
-                    logging.debug(f'Applied DL bonus, new score: {base_score}')
+                    logging.debug(f'Applied DL bonus at: {(x,y)}, new score: {base_score}')
                 elif bonus == 'TW':
                     word_multipliers.append(3)
-                    logging.debug(f'Applied TW bonus')
+                    logging.debug(f'Applied TW bonus at: {(x,y)}')
                 elif bonus == 'DW':
                     word_multipliers.append(2)
-                    logging.debug(f'Applied DW bonus')
+                    logging.debug(f'Applied DW bonus at: {(x,y)}')
         word_score += base_score
     for multiplier in word_multipliers:
         word_score *= multiplier
@@ -200,7 +202,7 @@ def on_press(key: Union[Key, KeyCode]) -> None: # callback function
         print('Shift key pressed. Exiting...')
         exit()
 
-def get_words_until_min_letters(word_scores, min_letters):
+def get_words_until_min_letters(word_scores: List[Tuple[str, int]], min_letters: int) -> List[Tuple[str, int]]:
     total_letters = 0
     for i, (word, _) in enumerate(word_scores):
         total_letters += len(word)
@@ -280,21 +282,31 @@ if __name__ == '__main__':
         word_scores.sort(key=lambda x: x[1], reverse=True)
 
         # *** minumum letters to enter, rounds up a word *** #
-        filtered_entries = get_words_until_min_letters(word_scores, 350)
+        filtered_entries = get_words_until_min_letters(word_scores, 50)
         print("Filtered entries:", filtered_entries)
 
-        for word, score in filtered_entries:
+        for i in range(len(filtered_entries)):
+            word, score = filtered_entries[i]
             print(f"Entering word: {word} with score: {score}")
             board_coords = solved[word]
             word_screen_coords = get_word_screen_coords(word, board_coords, top_left, bottom_right)
-            print(f"Word screen coordinates: {word_screen_coords}")
-            
+
             mouse_controller.position = word_screen_coords[0]
             mouse_controller.press(Button.left)
             # *** glide = False means instantly go to each coord *** #
-            glide_mouse_to_positions(word_screen_coords, duration=0, steps_multiplier_if_gliding=3, glide=False)
+            glide_mouse_to_positions(word_screen_coords, duration=0, steps_multiplier_if_gliding=3, glide=True)
             mouse_controller.release(Button.left)
-            time.sleep(0.1)
+
+            # If there is a next word, slowly move to its first position
+            if i < len(filtered_entries) - 1:
+                next_word, _ = filtered_entries[i + 1]
+                next_board_coords = solved[next_word]
+                next_word_screen_coords = get_word_screen_coords(next_word, next_board_coords, top_left, bottom_right)
+                glide_mouse_to_positions([mouse_controller.position, next_word_screen_coords[0]], duration=0.2, glide=False) 
+
+
+
+
 
 
 
