@@ -1,28 +1,61 @@
+# Why was this made?
+
+This project was made in hopes of earning money from Fanduel Faceoff. Honestly, that is the truth. I didn't create this with the goal of advancing my "python proficiency" or whatever fahdoodle, gurry, bull durham, bushwa, bottlewash, donkey dust, flubdub, flapdoodle, flummadiddle, flabberdegaz, bologna scraps you think could fit here. I heard about this app from a friend and decided to take a look. When I glaced at the available games, I saw that Boggle was an option. Immediately, my mind thought about all the ways I could automate this. From that day, I worked around 8-10 hours a day for nearly 2 weeks until it was finished. It was a rough journey. I had to scrap tons of ideas and files multiple times. I wanted to use my skills to actually make money!
+
+The Journey:
+
+OCR Method:
+I attempted to use Optical Character Recognition in order to identify the letters on the board. I used models from pytesseract, paddleOCR, easyOCR, and even Apple's native OCR feature baked into macOS. OCR didn't work too well. It struggled with understanding individual characters in a non-standard font. 
+
+Fully hard coded method:
+I collected all the standard game pieces (A-Z) and tried to perform morphological procedures to them in order to compare their similarity. I tried Mean Square Error, overlap ratios, HOG descriptors, etc. I peaked when I had around 50-80% accuracy per board. Clearly, this wasn't enough. Not good enough for me. I felt like these methods weren't adaptive enought. They felt underkill.
+
+Object Detection Method:
+First, I collected 100 game board. Then, I spent DAYS and DAYS annotating them. I also spent DAYS and DAYS trying to build Opencv myself until I realized that I could use a pre-built wheel that fit my GPU's specs. Spent a little while working through some Pytorch issues (which were really my fault, not torch's) and trained the model. Yay! It was crap! Complete garbage! It thought everything was the letter J. It did not work at all. I was about to annotate another dataset I collected, but stopped to reasses because annotating another 100 images would take another 3-4 days. I already have the structure of the game pieces, why did I need object detection? Truthfull, I didn't. This method is comletely overkill and yieled a lot of overhead, wasting resources and time.
+
+Structural Similarity Method:
+I invested a lot of time and energy by this point. I was ready to give up. But, that's just not what I do. 
+
+Then, just randomly surfing online, I found [this article](https://medium.com/scrapehero/exploring-image-similarity-approaches-in-python-b8ca0a3ed5a3#:~:text=Structural%20Similarity%20Index%20(SSIM),Python%20offers%20an%20SSIM%20implementation.) online
+
+
+***CONTINUE HERE
+
+
+
+# What does it do?
+
+When the script is run, it loads a structural simularity model by OpenAI into memory, then prompts the user to move their mouse to the top left and bottom right points of a certain region on the screen. At each point, press Enter to record the point. What region of the screen? Great question! If you have an android phone, you can use scrcpy to stream and control your phone, and if not, then you can use Bluestacks emulator. Run the Fanduel Faceoff application and start a boggle game. The top left point should be at the top left of the tile box, and the same idea for the bottom right. Wait to place that second point until after the letter pieces have dropped in the board and have stopped shaking. Once the second point is recorded, then the rectangular region between the two points will be captured. Then, it goes by itself! It will identify each letter on the board, recognize each bonus tile, calculate the possible words, and then the highest scoring words. It will then enter the best words using your mouse. In the code, you can turn glide to True if you want the mouse to follow a Catmull Rom spline to mimic a more human-like path.
+
+It actually works.
+
+Proof:
+
+***CONTINUE HERE
+
+
+
 # How to run this
 
 ## Step 1: Prerequisites
 
-CUDA 12.1 (for pytorch)
+*** THIS WILL ONLY WORK ON A WINDOWS PC ***
 
-install pytorch with cuda support
+Install [Anaconda](https://www.anaconda.com/download/success) if you don't have it already
 
-install some caffeine into your body, cuz ur gunna need it
+Install CUDA 12.1 (for pytorch) if you have a fairly modern Nvidia GPU (I used a 1660 Ti)
 
-prepare for headaches and errors to no avail
+Create a conda environment using: `conda create -n envname python=x.x anaconda`
 
-(not needed, but possible: opencv with gpu support
-CUDA 12.5, cuDNN 9.1.1, Nvidia Video Codec SDK 12.2
-Note: take a look at the opencv-python-cuda-wheels submodule for 
-some releases that might fit your machine - don't install in
-the same env as pytorch)
+Then, install pytorch (with CUDA support) with:
+`conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia`
 
+If you don't have an Nvidia card or a supported GPU, then refer to
+[this link](https://pytorch.org/) to find out how to install pytorch with your specific requirements
 
-Beware list:
-- don't use OS's native screen capture - it injects metadata we don't need, aspect ratio won't be 1:1. This is why we use opencv to get data - it doesn't add ICC color profiles by default. This is good for greyscale image collection. Data collection for a game window should be pretty consistant. I heard that having some background randomness is good for it, which is a plus in this situation. if you convert images to greyscale using opencv but they were taken in color, then you might get a warning from torch saying that greyscale images aren't allowed to have an ICC color profile.
-- building opencv with CUDA and cuDNN is hell. It's actual hell. I've done it before, I did it again, and again, and again. Not because I had to, but because I wanted to. Everything is tedius and the slightest misake can cause you to rebuild - which take hours sometimes. Messing with cmake is gross. Thank god a user on github showed me that we can use pre-built wheel files. The ones he made match my software and system specs, which was perfect. It works, but don't install torch with cuda in the same env. 
-- Make sure to use conda environments. Before, I was just doing the python -m venv venv technique and I wasn't able to switch versions. Plus it didn't come with some library directory that I needed. Just use conda, it makes life easier.
-- i messed up with a whole dataset. it was crap. i spent days labeling 100 images with in total, around 1900 individual annotations. I took screenshots on mac but each screenshot had a completely random size and aspect ratio. yeah, they were all resized to 1024x1024, but the content in them was stretched in weird ways. don't do this. just use opencv to get images with the correct aspect ratio so you don't have to worry about this augmentation. sometimes augmentation is good, but we don't want that much when we only have 100 images. also, the game that is running isn't going to be augmented, so there's not really a point to teaching it how to detect with this level of robustness.
-- if torch is unable to locate your labels because it thinks that they're background files, then your file names are messed up. learned that mistake. took screenshots on mac and they got weird space characters in them. spent a while tryna figure this one out.
-- using 544x928 for new model resolution. turn off ads in blustacks, adjust window size until it fits well (check with detect.py), close sidebar, make phone in vertical orientation, then fix window size, pin on top.
+Lastly, pip install the remaining dependencies from main.py
+
+If you have an android phone >= android OS 5, then you can stream and control your phone with your PC. Refer to [here](https://github.com/Genymobile/scrcpy/blob/master/doc/windows.md) for the installation instructions. If you don't have one, then you can use Bluestacks to emulate an android phone. The one caveat is that you won't be able to play games with monetary entry fees. It needs to verify your location. The location spoofer in Bluestacks doesn't work- I've tried, trust me. The FREE entry game works, but you can't earn any prizes. The maximum account money I could accumulate just by playing the FREE entry head-to-head games was $1.60. Reguardless, download the Fanduel Faceoff .apk [here](https://www.fanduel.com/android). 
 
 
+***CONTINUE HERE

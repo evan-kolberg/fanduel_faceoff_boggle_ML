@@ -282,7 +282,7 @@ if __name__ == '__main__':
         word_scores.sort(key=lambda x: x[1], reverse=True)
 
         # *** minumum letters to enter, rounds up a word *** #
-        filtered_entries = get_words_until_min_letters(word_scores, 50)
+        filtered_entries = get_words_until_min_letters(word_scores, 120) # TWEAK
         print("Filtered entries:", filtered_entries)
 
         for i in range(len(filtered_entries)):
@@ -294,7 +294,7 @@ if __name__ == '__main__':
             mouse_controller.position = word_screen_coords[0]
             mouse_controller.press(Button.left)
             # *** glide = False means instantly go to each coord *** #
-            glide_mouse_to_positions(word_screen_coords, duration=0, steps_multiplier_if_gliding=3, glide=True)
+            glide_mouse_to_positions(word_screen_coords, duration=0, steps_multiplier_if_gliding=3, glide=True) # TWEAK
             mouse_controller.release(Button.left)
 
             # If there is a next word, slowly move to its first position
@@ -302,7 +302,11 @@ if __name__ == '__main__':
                 next_word, _ = filtered_entries[i + 1]
                 next_board_coords = solved[next_word]
                 next_word_screen_coords = get_word_screen_coords(next_word, next_board_coords, top_left, bottom_right)
-                glide_mouse_to_positions([mouse_controller.position, next_word_screen_coords[0]], duration=0.2, glide=False) 
+                glide_mouse_to_positions([mouse_controller.position, next_word_screen_coords[0]], duration=0.1, glide=False) # TWEAK
+
+
+
+
 
 
 
