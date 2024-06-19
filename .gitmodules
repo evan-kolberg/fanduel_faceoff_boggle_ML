@@ -7,3 +7,6 @@
 [submodule "opencv-python-cuda-wheels"]
 	path = opencv-python-cuda-wheels
 	url = https://github.com/cudawarped/opencv-python-cuda-wheels.git
+[submodule "scrcpy"]
+	path = scrcpy
+	url = https://github.com/Genymobile/scrcpy.git
