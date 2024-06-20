@@ -1,3 +1,5 @@
+# Note: an article soon to be published on Medium.com will replace this readme
+
 # Why was this made?
 
 This project was made in hopes of earning money from Fanduel Faceoff. Honestly, that is the truth. I didn't create this with the goal of advancing my "python proficiency" or whatever fahdoodle, gurry, bull durham, bushwa, bottlewash, donkey dust, flubdub, flapdoodle, flummadiddle, flabberdegaz, bologna scraps you think could fit here. I heard about this app from a friend and decided to take a look. When I glaced at the available games, I saw that Boggle was an option. Immediately, my mind thought about all the ways I could automate this. From that day, I worked around 8-10 hours a day for nearly 2 weeks until it was finished. It was a rough journey. I had to scrap tons of ideas and files multiple times. I wanted to use my skills to actually make money!
@@ -13,13 +15,11 @@ I collected all the standard game pieces (A-Z) and tried to perform morphologica
 Object Detection Method:
 First, I collected 100 game board. Then, I spent DAYS and DAYS annotating them. I also spent DAYS and DAYS trying to build Opencv myself until I realized that I could use a pre-built wheel that fit my GPU's specs. Spent a little while working through some Pytorch issues (which were really my fault, not torch's) and trained the model. Yay! It was crap! Complete garbage! It thought everything was the letter J. It did not work at all. I was about to annotate another dataset I collected, but stopped to reasses because annotating another 100 images would take another 3-4 days. I already have the structure of the game pieces, why did I need object detection? Truthfull, I didn't. This method is comletely overkill and yieled a lot of overhead, wasting resources and time.
 
-Structural Similarity Method:
-I invested a lot of time and energy by this point. I was ready to give up. But, that's just not what I do. 
+VITCLIP Method:
+I invested a lot of time and energy by this point. I was ready to give up. But, that's just not what I do. So, I went running for answers. When I was just randomly surfing online, I found [this article](https://medium.com/scrapehero/exploring-image-similarity-approaches-in-python-b8ca0a3ed5a3#:~:text=Structural%20Similarity%20Index%20(SSIM),Python%20offers%20an%20SSIM%20implementation.). This article was my savior. It described all the popular ways image similarity is done in python, and at the bottom there was a deep learning based approach. Since I had already collected all the A-Z tiles, I gave it shot. I used what I learned from my other attemps, including the need for pre-processesing of the images before they are compared. To my surprise, it was able to accuratly identify the tiles each time with 100% accuracy! The target letter was always over 90% similar and the others were far below 80%, showing how robust this method was. Using color quantization, I was able to accuratly identify the special tiles.
 
-Then, just randomly surfing online, I found [this article](https://medium.com/scrapehero/exploring-image-similarity-approaches-in-python-b8ca0a3ed5a3#:~:text=Structural%20Similarity%20Index%20(SSIM),Python%20offers%20an%20SSIM%20implementation.) online
+All while working on the identification methods, I had found a boggle solving library made in python and tailored it to fit my specific needs. I also made computation more efficient by introducing a trie utilized when going through the dictionary of words. 
 
-
-***CONTINUE HERE
 
 
 
@@ -33,7 +33,8 @@ Proof:
 
 ***CONTINUE HERE
 
-
+![using_bluestacks](https://github.com/evan-kolberg/fanduel_faceoff_boggle_ML/blob/main/proof/Screenshot%202024-06-18%20125100.png?raw=true)
+![high_score](https://github.com/evan-kolberg/fanduel_faceoff_boggle_ML/blob/main/proof/Screenshot%202024-06-18%20143659.png?raw=true)
 
 # How to run this
 
