@@ -1,4 +1,4 @@
-# Note: an article soon to be published on Medium.com will replace this readme
+# Note: an article soon to be published on Medium.com will enhance this readme
 
 # Why was this made?
 
@@ -25,22 +25,23 @@ All while working on the identification methods, I had found a boggle solving li
 
 # What does it do?
 
-When the script is run, it loads a structural simularity model by OpenAI into memory, then prompts the user to move their mouse to the top left and bottom right points of a certain region on the screen. At each point, press Enter to record the point. What region of the screen? Great question! If you have an android phone, you can use scrcpy to stream and control your phone, and if not, then you can use Bluestacks emulator. Run the Fanduel Faceoff application and start a boggle game. The top left point should be at the top left of the tile box, and the same idea for the bottom right. Wait to place that second point until after the letter pieces have dropped in the board and have stopped shaking. Once the second point is recorded, then the rectangular region between the two points will be captured. Then, it goes by itself! It will identify each letter on the board, recognize each bonus tile, calculate the possible words, and then the highest scoring words. It will then enter the best words using your mouse. In the code, you can turn glide to True if you want the mouse to follow a Catmull Rom spline to mimic a more human-like path.
+When the script is run, it loads a vision transformer contrastive language-image pre-training model into memory, then prompts the user to move their mouse to the top left and bottom right points of a certain region on the screen. At each point, press Enter to record the point. What region of the screen? Great question! If you have an android phone, you can use scrcpy to stream and control your phone, and if not, then you can use Bluestacks emulator. Run the Fanduel Faceoff application and start a boggle game. The top left point should be at the top left of the tile box, and the same idea for the bottom right. Wait to place that second point until after the letter pieces have dropped in the board and have stopped shaking. Once the second point is recorded, then the rectangular region between the two points will be captured. Then, it goes by itself! It will identify each letter on the board, recognize each bonus tile, calculate the possible words, and then the highest scoring words. It will then enter the best words using your mouse. In the code, you can turn glide to True if you want the mouse to follow a Catmull Rom spline to mimic a more human-like path. The mouse dragging movements will be simulated as finger dragging on your phone. 
 
-It actually works.
+It was hard, but it actually works. I'm proud of myself.
 
-Proof:
 
-***CONTINUE HERE
-
+![real_android](https://github.com/evan-kolberg/fanduel_faceoff_boggle_ML/blob/main/proof/20240620_023628000_iOS.png?raw=true)
+![it_running](https://github.com/evan-kolberg/fanduel_faceoff_boggle_ML/blob/main/proof/20240620_030933000_iOS.png?raw=true)
 ![using_bluestacks](https://github.com/evan-kolberg/fanduel_faceoff_boggle_ML/blob/main/proof/Screenshot%202024-06-18%20125100.png?raw=true)
 ![high_score](https://github.com/evan-kolberg/fanduel_faceoff_boggle_ML/blob/main/proof/Screenshot%202024-06-18%20143659.png?raw=true)
+
+
 
 # How to run this
 
 ## Step 1: Prerequisites
 
-*** THIS WILL ONLY WORK ON A WINDOWS PC ***
+*** in this repo, main.py was made to work with a windows machine ***
 
 Install [Anaconda](https://www.anaconda.com/download/success) if you don't have it already
 
@@ -59,4 +60,6 @@ Lastly, pip install the remaining dependencies from main.py
 If you have an android phone >= android OS 5, then you can stream and control your phone with your PC. Refer to [here](https://github.com/Genymobile/scrcpy/blob/master/doc/windows.md) for the installation instructions. If you don't have one, then you can use Bluestacks to emulate an android phone. The one caveat is that you won't be able to play games with monetary entry fees. It needs to verify your location. The location spoofer in Bluestacks doesn't work- I've tried, trust me. The FREE entry game works, but you can't earn any prizes. The maximum account money I could accumulate just by playing the FREE entry head-to-head games was $1.60. Reguardless, download the Fanduel Faceoff .apk [here](https://www.fanduel.com/android). 
 
 
-***CONTINUE HERE
+# Step 2:
+
+Run main.py in the root directory. Pray it works!
