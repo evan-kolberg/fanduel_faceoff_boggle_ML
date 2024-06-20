@@ -285,6 +285,13 @@ if __name__ == '__main__':
         filtered_entries = get_words_until_min_letters(word_scores, 120) # TWEAK
         print("Filtered entries:", filtered_entries)
 
+        # move slowly to first pos of first word
+        if filtered_entries:
+            first_word, _ = filtered_entries[0]
+            first_board_coords = solved[first_word]
+            first_word_screen_coords = get_word_screen_coords(first_word, first_board_coords, top_left, bottom_right)
+            glide_mouse_to_positions([mouse_controller.position, first_word_screen_coords[0]], duration=0.1, glide=False)
+
         for i in range(len(filtered_entries)):
             word, score = filtered_entries[i]
             print(f"Entering word: {word} with score: {score}")
