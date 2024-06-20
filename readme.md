@@ -29,13 +29,16 @@ When the script is run, it loads a vision transformer contrastive language-image
 
 It was hard, but it actually works. I'm proud of myself.
 
-<iframe src="https://onedrive.live.com/embed?resid=E50200881918EF62%2116189&authkey=!AHw3udgregzONy8" width="98" height="120" frameborder="0" scrolling="no"></iframe>
-
 ![real_android](https://github.com/evan-kolberg/fanduel_faceoff_boggle_ML/blob/main/proof/20240620_023628000_iOS.png?raw=true)
 ![it_running](https://github.com/evan-kolberg/fanduel_faceoff_boggle_ML/blob/main/proof/20240620_030933000_iOS.png?raw=true)
 ![using_bluestacks](https://github.com/evan-kolberg/fanduel_faceoff_boggle_ML/blob/main/proof/Screenshot%202024-06-18%20125100.png?raw=true)
 ![high_score](https://github.com/evan-kolberg/fanduel_faceoff_boggle_ML/blob/main/proof/Screenshot%202024-06-18%20143659.png?raw=true)
 
+Videos:
+- https://1drv.ms/u/s!AmLvGBmIAALl_j0rwvSKmn85bb3E?e=gloGHJ
+- https://1drv.ms/v/s!AmLvGBmIAALl_j9Jm4VVKOTMIvnr?e=8u0qRO
+- https://1drv.ms/v/s!AmLvGBmIAALl_j6gcCZ2WCeX0jPg?e=eaPyq5
+- https://1drv.ms/v/s!AmLvGBmIAALl_kC4dN-yf_HkrhEm?e=McAm4a
 
 
 # How to run this
