@@ -108,11 +108,11 @@ def classify_and_store_bonus_tiles(color_pieces: List[np.ndarray]) -> Dict[str, 
         avg_color = get_average_color(piece)
         print(f"Piece {i} average color:", avg_color)
         x, y = i % 4, i // 4
-        if np.allclose(avg_color, [230, 190, 55], atol=20):
+        if np.allclose(avg_color, [230, 190, 70], atol=20):
             bonus_tiles['DL'].append((x, y))
         elif np.allclose(avg_color, [100, 180, 55], atol=20):
             bonus_tiles['DW'].append((x, y))
-        elif np.allclose(avg_color, [245, 100, 55], atol=20):
+        elif np.allclose(avg_color, [245, 100, 75], atol=20):
             bonus_tiles['TL'].append((x, y))
         elif np.allclose(avg_color, [145, 100, 230], atol=20):
             bonus_tiles['TW'].append((x, y))
