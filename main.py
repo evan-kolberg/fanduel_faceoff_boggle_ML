@@ -106,6 +106,7 @@ def classify_and_store_bonus_tiles(color_pieces: List[np.ndarray]) -> Dict[str, 
     bonus_tiles = {'DL': [], 'DW': [], 'TL': [], 'TW': []}
     for i, piece in enumerate(color_pieces):
         avg_color = get_average_color(piece)
+        logging.debug(f"Piece {i} average color: {avg_color}")
         print(f"Piece {i} average color:", avg_color)
         x, y = i % 4, i // 4
         if np.allclose(avg_color, [230, 190, 70], atol=20): # TWEAK
@@ -125,11 +126,13 @@ def calculate_word_score(word: str,
                          letter_points: Dict[str, int]) -> int:
     word_score = 0
     word_multipliers = []
+    logging.debug(f'Scoring: {word}...')
+    logging.debug(f'Coords: {coords}')
+    logging.debug(f'Bonus tiles: {bonus_tiles}')
     for (x, y) in coords:
         letter = board[y][x]
         base_score = letter_points[letter]
-        logging.debug(f'Scoring: {word}...')
-        logging.debug(f'Coords: {coords}')
+        
         logging.debug(f'Letter: {letter}, Base Score: {base_score}')
         for bonus, positions in bonus_tiles.items():
             if (x, y) in positions:
@@ -259,11 +262,14 @@ if __name__ == '__main__':
             scores = compareAllImages(piece, "control_group")
             most_similar_letter, highest_score = get_most_similar_letter(scores)
             letters.append(most_similar_letter)
-            print('Most similar letter:', most_similar_letter, 'with score:', highest_score)
+            logging.debug(f'Piece {index} - Most similar letter: {most_similar_letter} with score: {highest_score}')
+            print(f'Piece {index} - Most similar letter:', most_similar_letter, 'with score:', highest_score)
 
         board = list_to_board(letters)
         print('Board:', board)
         print('Bonus tiles:', bonus_tiles)
+        logging.debug(f'Board: {board}')
+        logging.debug(f'Bonus tiles: {bonus_tiles}')
 
         boggle = Boggle(board)
         solved = boggle.solve()
