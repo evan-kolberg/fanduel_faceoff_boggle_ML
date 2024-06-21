@@ -16,6 +16,7 @@ from pyggle.lib.pyggle import Boggle, boggle
 from concurrent.futures import ThreadPoolExecutor
 from scipy.interpolate import CubicSpline, interp1d
 
+
 def imageEncoder(img: np.ndarray) -> torch.Tensor:
     img = Image.fromarray(img).convert('RGB')
     img = preprocess(img).unsqueeze(0).to(device)
@@ -132,7 +133,6 @@ def calculate_word_score(word: str,
     for (x, y) in coords:
         letter = board[y][x]
         base_score = letter_points[letter]
-        
         logging.debug(f'Letter: {letter}, Base Score: {base_score}')
         for bonus, positions in bonus_tiles.items():
             if (x, y) in positions:
