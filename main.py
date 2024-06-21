@@ -288,7 +288,7 @@ if __name__ == '__main__':
         word_scores.sort(key=lambda x: x[1], reverse=True)
 
         # *** minumum letters to enter, rounds up a word *** #
-        filtered_entries = get_words_until_min_letters(word_scores, 120) # TWEAK
+        filtered_entries = get_words_until_min_letters(word_scores, 125) # TWEAK
         print("Filtered entries:", filtered_entries)
 
         # move slowly to first pos of first word
@@ -296,7 +296,7 @@ if __name__ == '__main__':
             first_word, _ = filtered_entries[0]
             first_board_coords = solved[first_word]
             first_word_screen_coords = get_word_screen_coords(first_word, first_board_coords, top_left, bottom_right)
-            glide_mouse_to_positions([mouse_controller.position, first_word_screen_coords[0]], duration=0.1, glide=False)
+            glide_mouse_to_positions([mouse_controller.position, first_word_screen_coords[0]], duration=0.08, glide=False)
 
         for i in range(len(filtered_entries)):
             word, score = filtered_entries[i]
@@ -315,7 +315,7 @@ if __name__ == '__main__':
                 next_word, _ = filtered_entries[i + 1]
                 next_board_coords = solved[next_word]
                 next_word_screen_coords = get_word_screen_coords(next_word, next_board_coords, top_left, bottom_right)
-                glide_mouse_to_positions([mouse_controller.position, next_word_screen_coords[0]], duration=0.1, glide=False) # TWEAK
+                glide_mouse_to_positions([mouse_controller.position, next_word_screen_coords[0]], duration=0.08, glide=False) # TWEAK
 
 
 
