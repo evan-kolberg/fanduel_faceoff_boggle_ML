@@ -17,11 +17,11 @@ from concurrent.futures import ThreadPoolExecutor
 from scipy.interpolate import CubicSpline, interp1d
 
 def imageEncoder(img: np.ndarray) -> torch.Tensor:
-    img1 = Image.fromarray(img).convert('RGB')
-    img1 = preprocess(img1).unsqueeze(0).to(device)
+    img = Image.fromarray(img).convert('RGB')
+    img = preprocess(img).unsqueeze(0).to(device)
     with torch.no_grad():
-        img1 = model.encode_image(img1)
-    return img1
+        img = model.encode_image(img)
+    return img
 
 def generateScore(img1: np.ndarray, img2: np.ndarray) -> float:
     img1, img2 = map(imageEncoder, (img1, img2))
@@ -30,14 +30,14 @@ def generateScore(img1: np.ndarray, img2: np.ndarray) -> float:
     return score
 
 def compareAllImages(img: np.ndarray, directory: str) -> List[Tuple[str, float]]:
-    img1 = imageEncoder(img)
+    img1_tensor = imageEncoder(img)
     scores = []
     filenames = [f for f in os.listdir(directory) if f.endswith('.png')]
     def process_image(filename):
         image_path = os.path.join(directory, filename)
         img2 = cv2.imread(image_path)
         img2_tensor = imageEncoder(img2)
-        cos_scores = util.pytorch_cos_sim(img1, img2_tensor)
+        cos_scores = util.pytorch_cos_sim(img1_tensor, img2_tensor)
         score = round(float(cos_scores[0][0]) * 100, 2)
         return filename, score
     with ThreadPoolExecutor() as executor:
