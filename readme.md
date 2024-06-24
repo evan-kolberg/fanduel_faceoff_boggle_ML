@@ -1,4 +1,5 @@
-# Note: an article soon to be published on Medium.com will enhance this readme
+# Note: [an article](https://medium.com/@evankolberg/dominating-a-skill-based-casino-game-with-deep-learning-83dee3c7fd78) published on Medium.com enhanced this readme
+
 
 # Why was this made?
 
