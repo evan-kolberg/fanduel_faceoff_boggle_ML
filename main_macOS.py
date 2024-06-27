@@ -286,7 +286,7 @@ if __name__ == '__main__':
         word_scores.sort(key=lambda x: x[1], reverse=True)
 
         # *** minumum letters to enter, rounds up a word *** #
-        filtered_entries = get_words_until_min_letters(word_scores, 170) # TWEAK
+        filtered_entries = get_words_until_min_letters(word_scores, 175) # TWEAK
         print("Filtered entries:", filtered_entries)
 
         # move slowly to first pos of first word
