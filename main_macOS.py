@@ -48,11 +48,9 @@ def compareAllImages(img: np.ndarray, directory: str) -> List[Tuple[str, float]]
     return scores
 
 def capture_screen_region_for_colors(top_left: tuple, bottom_right: tuple) -> np.ndarray:
+    # grab as RGB, convert once to BGR and return raw BGR
     img = ImageGrab.grab(bbox=(top_left[0], top_left[1], bottom_right[0], bottom_right[1]))
-    open_cv_image = np.array(img)
-    open_cv_image = open_cv_image[:, :, ::-1].copy()
-    color_image = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
-    return np.array(color_image)
+    return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
 
 def capture_screen_region_for_comparison(top_left: tuple, bottom_right: tuple) -> np.ndarray:
     img = ImageGrab.grab(bbox=(top_left[0], top_left[1], bottom_right[0], bottom_right[1]))
@@ -108,17 +106,13 @@ def classify_and_store_bonus_tiles(color_pieces: List[np.ndarray]) -> Dict[str, 
         logging.debug(f"Piece {i} average color: {avg_color}")
         print(f"Piece {i} average color:", avg_color)
         x, y = i % 4, i // 4
-        # DL (yellow) measured BGR [93,180,203]
-        if np.allclose(avg_color, [93, 180, 203], atol=15):
+        if np.allclose(avg_color, [93, 180, 203], atol=40):
             bonus_tiles['DL'].append((x, y))
-        # DW (green) measured BGR [85,180,135]
-        elif np.allclose(avg_color, [85, 180, 135], atol=15):
+        elif np.allclose(avg_color, [85, 180, 135], atol=40):
             bonus_tiles['DW'].append((x, y))
-        # TL (reddish/orange) measured BGR [87,117,199]
-        elif np.allclose(avg_color, [87, 117, 199], atol=15):
+        elif np.allclose(avg_color, [70, 92, 168], atol=40):
             bonus_tiles['TL'].append((x, y))
-        # TW (purple) measured BGR [200,112,142]
-        elif np.allclose(avg_color, [200, 112, 142], atol=15):
+        elif np.allclose(avg_color, [170, 90, 118], atol=40):
             bonus_tiles['TW'].append((x, y))
     return bonus_tiles
 
