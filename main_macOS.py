@@ -1,19 +1,22 @@
-import os
-import cv2
-import time
-import torch
 import logging
+import os
+import random
+import time
+from concurrent.futures import ThreadPoolExecutor
+from typing import Dict, List, Tuple, Union
+
+import cv2
+import numpy as np
 import open_clip
 import pyautogui
-import numpy as np
+import torch
 from PIL import Image, ImageGrab
-from pynput import mouse, keyboard
-from sentence_transformers import util
+from pynput import keyboard, mouse
 from pynput.keyboard import Key, KeyCode
-from typing import List, Tuple, Union, Dict
-from pyggle.lib.pyggle import Boggle, boggle
-from concurrent.futures import ThreadPoolExecutor
 from scipy.interpolate import CubicSpline, interp1d
+from sentence_transformers import util
+
+from pyggle.lib.pyggle import Boggle, boggle
 
 
 def imageEncoder(img: np.ndarray) -> torch.Tensor:
@@ -94,12 +97,9 @@ def list_to_board(lst: list) -> list[list[str]]:
     return [lst[i * 4: i * 4 + 4] for i in range(4)]
 
 def get_average_color(image: np.ndarray, k: int = 3) -> np.ndarray:
-    pixels = image.reshape(-1, 3).astype(np.float32)
-    _, labels, centers = cv2.kmeans(pixels, k, None,
-                                    (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2),
-                                    10, cv2.KMEANS_RANDOM_CENTERS)
-    average_color = centers[np.argmax(np.bincount(labels.flatten()))]
-    return average_color
+    # simple per‑channel mean for consistent color readings
+    flat = image.reshape(-1, 3).astype(np.float32)
+    return flat.mean(axis=0)
 
 def classify_and_store_bonus_tiles(color_pieces: List[np.ndarray]) -> Dict[str, List[Tuple[int, int]]]:
     bonus_tiles = {'DL': [], 'DW': [], 'TL': [], 'TW': []}
@@ -108,13 +108,17 @@ def classify_and_store_bonus_tiles(color_pieces: List[np.ndarray]) -> Dict[str, 
         logging.debug(f"Piece {i} average color: {avg_color}")
         print(f"Piece {i} average color:", avg_color)
         x, y = i % 4, i // 4
-        if np.allclose(avg_color, [230, 190, 70], atol=20): # TWEAK
+        # DL (yellow) measured BGR [93,180,203]
+        if np.allclose(avg_color, [93, 180, 203], atol=15):
             bonus_tiles['DL'].append((x, y))
-        elif np.allclose(avg_color, [100, 180, 55], atol=20): # TWEAK
+        # DW (green) measured BGR [85,180,135]
+        elif np.allclose(avg_color, [85, 180, 135], atol=15):
             bonus_tiles['DW'].append((x, y))
-        elif np.allclose(avg_color, [245, 100, 75], atol=20): # TWEAK
+        # TL (reddish/orange) measured BGR [87,117,199]
+        elif np.allclose(avg_color, [87, 117, 199], atol=15):
             bonus_tiles['TL'].append((x, y))
-        elif np.allclose(avg_color, [145, 100, 230], atol=20): # TWEAK
+        # TW (purple) measured BGR [200,112,142]
+        elif np.allclose(avg_color, [200, 112, 142], atol=15):
             bonus_tiles['TW'].append((x, y))
     return bonus_tiles
 
@@ -221,10 +225,12 @@ if __name__ == '__main__':
         'U': 1, 'V': 4, 'W': 4, 'X': 8, 'Y': 4, 'Z': 10
     }
 
-    print('Loading model...')
+    
     device = "mps" if torch.backends.mps.is_available() and torch.backends.mps.is_built() else "cpu"
     print('Using device:', device)
-    model, _, preprocess = open_clip.create_model_and_transforms('RN50', pretrained='openai')
+    print('Loading model...')
+    # use a lighter ViT‑B‑32 for faster encoding
+    model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-32', pretrained='openai')
     model.to(device)
     print('Model loaded.')
 
@@ -234,14 +240,17 @@ if __name__ == '__main__':
 
     while True:
         mouse_positions = []
-        print('Listening for Enter key...')
+        print('Listening for green‑check, then board top‑left and bottom‑right clicks...')
+        # need 3 clicks: green‑check button, board top-left, board bottom-right
+        while len(mouse_positions) < 3: pass
 
-        while len(mouse_positions) < 2: pass
+        green_check  = (round(mouse_positions[0][0]), round(mouse_positions[0][1]))
+        top_left     = (round(mouse_positions[1][0]), round(mouse_positions[1][1]))
+        bottom_right = (round(mouse_positions[2][0]), round(mouse_positions[2][1]))
 
-        top_left = (round(mouse_positions[0][0]), round(mouse_positions[0][1]))
-        bottom_right = (round(mouse_positions[1][0]), round(mouse_positions[1][1]))
-        print('First mouse position:', mouse_positions[0])
-        print('Second mouse position:', mouse_positions[1])
+        print('Green check position:',           mouse_positions[0])
+        print('Board top-left corner position:',  mouse_positions[1])
+        print('Board bottom-right corner position:', mouse_positions[2])
         print('Positions captured.')
 
         region = capture_screen_region_for_comparison(top_left, bottom_right)
@@ -285,8 +294,8 @@ if __name__ == '__main__':
         
         word_scores.sort(key=lambda x: x[1], reverse=True)
 
-        # *** minumum letters to enter, rounds up a word *** #
-        filtered_entries = get_words_until_min_letters(word_scores, 175) # TWEAK
+        # *** minumum letters to enter, rounds up a word *** 
+        filtered_entries = get_words_until_min_letters(word_scores, 135) # TWEAK
         print("Filtered entries:", filtered_entries)
 
         # move slowly to first pos of first word
@@ -302,11 +311,18 @@ if __name__ == '__main__':
             board_coords = solved[word]
             word_screen_coords = get_word_screen_coords(word, board_coords, top_left, bottom_right)
 
-            mouse_controller.position = word_screen_coords[0]
-            pyautogui.mouseDown(button='left')
-            # *** glide = False means instantly go to each coord ***
-            glide_mouse_to_positions(word_screen_coords, duration=0, steps_multiplier_if_gliding=3, glide=False) # TWEAK
-            pyautogui.mouseUp(button='left')
+            # click near center of each tile with small randomness
+            cell_w = (bottom_right[0] - top_left[0]) / 4
+            cell_h = (bottom_right[1] - top_left[1]) / 4
+            for grid_x, grid_y in board_coords:
+                center_x = top_left[0] + grid_x * cell_w + cell_w / 2
+                center_y = top_left[1] + grid_y * cell_h + cell_h / 2
+                rand_x = center_x + random.uniform(-cell_w * 0.25, cell_w * 0.25)
+                rand_y = center_y + random.uniform(-cell_h * 0.25, cell_h * 0.25)
+                pyautogui.click(rand_x, rand_y)
+                time.sleep(random.uniform(0.01, 0.2))
+            pyautogui.click(green_check[0], green_check[1])
+            time.sleep(random.uniform(0.01, 0.4))
 
             # If there is a next word, slowly move to its first position
             if i < len(filtered_entries) - 1:
@@ -314,6 +330,7 @@ if __name__ == '__main__':
                 next_board_coords = solved[next_word]
                 next_word_screen_coords = get_word_screen_coords(next_word, next_board_coords, top_left, bottom_right)
                 glide_mouse_to_positions([mouse_controller.position, next_word_screen_coords[0]], duration=0.08, glide=False) # TWEAK
+
 
 
 
